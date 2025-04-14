@@ -14,25 +14,8 @@ serve(async (req) => {
   }
 
   try {
-    // Initialize Supabase client with environment variables
-    const supabaseUrl = Deno.env.get('SUPABASE_URL') || '';
-    const supabaseAnonKey = Deno.env.get('SUPABASE_ANON_KEY') || '';
+    console.log("Edge function called");
     
-    console.log("SUPABASE_URL:", supabaseUrl ? "Present" : "Missing");
-    console.log("SUPABASE_ANON_KEY:", supabaseAnonKey ? "Present" : "Missing");
-    
-    if (!supabaseUrl || !supabaseAnonKey) {
-      throw new Error("Missing Supabase environment variables");
-    }
-    
-    const supabase = createClient(supabaseUrl, supabaseAnonKey);
-
-    // Debug request headers
-    console.log("Headers received in request:");
-    for (const [key, value] of req.headers.entries()) {
-      console.log(`${key}: ${value.substring(0, 5)}...`);
-    }
-
     // Get OpenAI API key directly from environment variables
     const apiKey = Deno.env.get('OPENAI_API_KEY');
     
