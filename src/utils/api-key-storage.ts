@@ -1,29 +1,61 @@
 
-// Utility functions to handle model and prompt storage in browser storage
+// Utility functions to handle model and prompt storage using Supabase
 
-// Add functions to manage saved model
-export const saveModel = (model: string): void => {
-  localStorage.setItem('openai_model', model);
-};
+import { supabase } from "@/integrations/supabase/client";
 
-export const getModel = (): string => {
-  return localStorage.getItem('openai_model') || 'gpt-4o'; // Default to gpt-4o
-};
-
-// Add function to manage custom prompt
-export const saveCustomPrompt = (prompt: string | null): void => {
-  if (prompt) {
-    localStorage.setItem('openai_custom_prompt', prompt);
-  } else {
-    localStorage.removeItem('openai_custom_prompt');
+export const saveModel = async (model: string): Promise<void> => {
+  const { error } = await supabase
+    .from('app_settings')
+    .update({ value: model })
+    .eq('id', 'openai_default_model');
+  
+  if (error) {
+    console.error('Error saving model:', error);
   }
 };
 
-export const getCustomPrompt = (): string | null => {
-  return localStorage.getItem('openai_custom_prompt');
+export const getModel = async (): Promise<string> => {
+  const { data, error } = await supabase
+    .from('app_settings')
+    .select('value')
+    .eq('id', 'openai_default_model')
+    .single();
+  
+  if (error) {
+    console.error('Error retrieving model:', error);
+    return 'gpt-4o'; // Default fallback
+  }
+  
+  return data?.value || 'gpt-4o';
 };
 
-// These are kept for backward compatibility but are no longer used
+export const saveCustomPrompt = async (prompt: string | null): Promise<void> => {
+  const { error } = await supabase
+    .from('app_settings')
+    .update({ value: prompt || '' })
+    .eq('id', 'openai_custom_prompt');
+  
+  if (error) {
+    console.error('Error saving custom prompt:', error);
+  }
+};
+
+export const getCustomPrompt = async (): Promise<string | null> => {
+  const { data, error } = await supabase
+    .from('app_settings')
+    .select('value')
+    .eq('id', 'openai_custom_prompt')
+    .single();
+  
+  if (error) {
+    console.error('Error retrieving custom prompt:', error);
+    return null;
+  }
+  
+  return data?.value || null;
+};
+
+// Kept for backward compatibility
 export const saveApiKey = (): void => {};
 export const getApiKey = (): string => { return "server-managed"; };
 export const hasApiKey = (): boolean => { return true; }; 

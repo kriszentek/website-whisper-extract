@@ -18,9 +18,7 @@ import {
 import { 
   Check, 
   Key, 
-  Trash2,
   AlertCircle,
-  ExternalLink
 } from "lucide-react";
 import { toast } from "sonner";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -28,42 +26,26 @@ import { OpenAIModel, ApiKeyFormProps } from "@/types";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 
 export default function ApiKeyForm({ onModelChange }: ApiKeyFormProps = {}) {
-  const [apiKey, setApiKey] = useState("");
-  const [hasSavedKey, setHasSavedKey] = useState(true); // Always true with server-side key
-  const [isVisible, setIsVisible] = useState(false);
-  const [model, setModel] = useState<OpenAIModel>(getModel() as OpenAIModel || 'gpt-4o');
+  const [hasSavedKey, setHasSavedKey] = useState(true);
+  const [model, setModel] = useState<OpenAIModel>('gpt-4o');
 
-  // No need to check for API key as it's now handled on the server
   useEffect(() => {
-    // Set as true since we're using server-side API key
-    setHasSavedKey(true);
-    // Mask the display with a placeholder
-    setApiKey("••••••••••••••••••••••••••");
+    async function fetchModel() {
+      const storedModel = await getModel();
+      setModel(storedModel as OpenAIModel);
+    }
+    fetchModel();
   }, []);
 
-  const handleSaveKey = () => {
-    // Not storing the key locally anymore, just inform user
-    toast.info("API keys are now managed on the server");
-  };
-
-  const handleRemoveKey = () => {
-    // Just for UI consistency
-    toast.info("API keys are managed on the server and cannot be removed from the client");
-  };
-
-  const toggleVisibility = () => {
-    // Since we don't actually have the key, just show a message
-    toast.info("The actual API key is securely stored on the server");
-    setIsVisible(false);
-  };
-
-  const handleModelChange = (value: string) => {
+  const handleModelChange = async (value: string) => {
     const newModel = value as OpenAIModel;
+    await saveModel(newModel);
     setModel(newModel);
-    saveModel(newModel);
+    
     if (onModelChange) {
       onModelChange(newModel);
     }
+    
     toast.info(`Model changed to ${newModel}`);
   };
 
@@ -75,7 +57,7 @@ export default function ApiKeyForm({ onModelChange }: ApiKeyFormProps = {}) {
           OpenAI API Settings
         </CardTitle>
         <CardDescription>
-          API keys are now securely managed on the server. You can still select which OpenAI model to use.
+          API keys are securely managed on the server. Select your preferred OpenAI model.
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
@@ -88,13 +70,13 @@ export default function ApiKeyForm({ onModelChange }: ApiKeyFormProps = {}) {
               id="apiKey"
               type="password"
               placeholder="Managed by server"
-              value={apiKey}
+              value="••••••••••••••••••••••••••"
               disabled={true}
               className="flex-1 bg-muted"
             />
           </div>
           <p className="text-xs text-muted-foreground">
-            The API key is now securely managed on the server
+            The API key is securely managed on the server
           </p>
         </div>
 
@@ -120,13 +102,13 @@ export default function ApiKeyForm({ onModelChange }: ApiKeyFormProps = {}) {
           <AlertDescription>
             <div className="space-y-2">
               <p className="font-medium">Server-Powered AI</p>
-              <p className="text-sm">This application now uses a server-side API key. You no longer need to provide your own OpenAI API key.</p>
+              <p className="text-sm">This application uses a server-side API key for secure OpenAI integration.</p>
             </div>
           </AlertDescription>
         </Alert>
       </CardContent>
       <CardFooter className="flex justify-end">
-        <Button onClick={handleModelChange.bind(null, model)} className="gap-2">
+        <Button onClick={() => handleModelChange(model)} className="gap-2">
           <Check className="h-4 w-4" />
           Apply Model
         </Button>
