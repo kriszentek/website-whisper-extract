@@ -3,15 +3,37 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { saveApiKey, getApiKey, removeApiKey } from "@/utils/api-key-storage";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Check, Key, Trash2 } from "lucide-react";
+import { 
+  saveApiKey, 
+  getApiKey, 
+  removeApiKey, 
+  saveModel, 
+  getModel 
+} from "@/utils/api-key-storage";
+import { 
+  Card, 
+  CardContent, 
+  CardDescription, 
+  CardFooter, 
+  CardHeader, 
+  CardTitle 
+} from "@/components/ui/card";
+import { 
+  Check, 
+  Key, 
+  Trash2,
+  AlertCircle 
+} from "lucide-react";
 import { toast } from "sonner";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { OpenAIModel, ApiKeyFormProps } from "@/types";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
-export default function ApiKeyForm() {
+export default function ApiKeyForm({ onModelChange }: ApiKeyFormProps = {}) {
   const [apiKey, setApiKey] = useState("");
   const [hasSavedKey, setHasSavedKey] = useState(false);
   const [isVisible, setIsVisible] = useState(false);
+  const [model, setModel] = useState<OpenAIModel>(getModel() as OpenAIModel || 'gpt-4o-mini');
 
   useEffect(() => {
     const savedKey = getApiKey();
@@ -44,6 +66,16 @@ export default function ApiKeyForm() {
     setIsVisible(!isVisible);
   };
 
+  const handleModelChange = (value: string) => {
+    const newModel = value as OpenAIModel;
+    setModel(newModel);
+    saveModel(newModel);
+    if (onModelChange) {
+      onModelChange(newModel);
+    }
+    toast.info(`Model changed to ${newModel}`);
+  };
+
   return (
     <Card className="w-full">
       <CardHeader>
@@ -57,7 +89,7 @@ export default function ApiKeyForm() {
             : "Enter your OpenAI API key to use the company info extraction features."}
         </CardDescription>
       </CardHeader>
-      <CardContent>
+      <CardContent className="space-y-4">
         <div className="space-y-2">
           <div className="flex items-center justify-between">
             <Label htmlFor="apiKey">API Key</Label>
@@ -83,6 +115,30 @@ export default function ApiKeyForm() {
             />
           </div>
         </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="model">OpenAI Model</Label>
+          <Select value={model} onValueChange={handleModelChange}>
+            <SelectTrigger>
+              <SelectValue placeholder="Select model" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="gpt-4o-mini">GPT-4o Mini (Faster, cheaper)</SelectItem>
+              <SelectItem value="gpt-4o">GPT-4o (More powerful)</SelectItem>
+              <SelectItem value="gpt-4.5-preview">GPT-4.5 Preview (Most powerful)</SelectItem>
+            </SelectContent>
+          </Select>
+          <p className="text-xs text-muted-foreground">
+            Select a different model if you're experiencing permission issues
+          </p>
+        </div>
+
+        <Alert variant="destructive" className="bg-destructive/10">
+          <AlertCircle className="h-4 w-4" />
+          <AlertDescription>
+            If you're seeing API key permission errors, ensure your API key has access to the selected model, or try a different model.
+          </AlertDescription>
+        </Alert>
       </CardContent>
       <CardFooter className="flex justify-between">
         <Button 

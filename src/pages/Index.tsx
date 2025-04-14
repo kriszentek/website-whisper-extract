@@ -4,7 +4,7 @@ import WebsiteForm from "@/components/WebsiteForm";
 import ResultsCard from "@/components/ResultsCard";
 import ApiKeyForm from "@/components/ApiKeyForm";
 import CustomFieldsManager from "@/components/CustomFieldsManager";
-import { CompanyData, ExtractField } from "@/types";
+import { CompanyData, ExtractField, OpenAIModel } from "@/types";
 import { extractCompanyInfo } from "@/services/openai-service";
 import { getExtractFields, addExtractField, removeExtractField } from "@/utils/extract-fields-storage";
 import { DEFAULT_EXTRACT_FIELDS } from "@/utils/constants";
@@ -53,6 +53,11 @@ export default function Index() {
     }
   };
 
+  const handleModelChange = (model: OpenAIModel) => {
+    // When model changes, we can clear previous data to avoid confusion
+    setCompanyData(null);
+  };
+
   return (
     <div className="container max-w-4xl py-8 px-4">
       <header className="mb-8 text-center">
@@ -95,7 +100,7 @@ export default function Index() {
         </TabsContent>
 
         <TabsContent value="settings" className="mt-6">
-          <ApiKeyForm />
+          <ApiKeyForm onModelChange={handleModelChange} />
           <div className="mt-6">
             <h3 className="text-lg font-medium">About Website Whisper</h3>
             <p className="text-muted-foreground mt-2">

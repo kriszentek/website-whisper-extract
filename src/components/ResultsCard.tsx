@@ -18,7 +18,9 @@ export default function ResultsCard({ data, isLoading }: ResultsCardProps) {
             <Info className="h-5 w-5" />
             Company Information
           </CardTitle>
-          <CardDescription><Skeleton className="h-4 w-40" /></CardDescription>
+          <CardDescription>
+            <div className="w-40"><Skeleton className="h-4 w-full" /></div>
+          </CardDescription>
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
@@ -86,9 +88,9 @@ export default function ResultsCard({ data, isLoading }: ResultsCardProps) {
             </div>
           ))}
           <div className="pt-4 border-t border-border">
-            <p className="text-xs text-muted-foreground">
+            <div className="text-xs text-muted-foreground">
               Results generated on {formatDate(data.timestamp)}
-            </p>
+            </div>
           </div>
         </div>
       </CardContent>

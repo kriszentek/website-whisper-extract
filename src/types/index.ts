@@ -20,3 +20,11 @@ export interface ApiResponse {
   data?: any;
   error?: string;
 }
+
+// Add available OpenAI models
+export type OpenAIModel = 'gpt-4o-mini' | 'gpt-4o' | 'gpt-4.5-preview';
+
+export interface ApiKeyFormProps {
+  onModelChange?: (model: OpenAIModel) => void;
+}
+

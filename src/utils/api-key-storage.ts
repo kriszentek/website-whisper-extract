@@ -15,3 +15,13 @@ export const hasApiKey = (): boolean => {
 export const removeApiKey = (): void => {
   localStorage.removeItem('openai_api_key');
 };
+
+// Add functions to manage saved model
+export const saveModel = (model: string): void => {
+  localStorage.setItem('openai_model', model);
+};
+
+export const getModel = (): string => {
+  return localStorage.getItem('openai_model') || 'gpt-4o-mini';
+};
+
