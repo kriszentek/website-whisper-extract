@@ -64,8 +64,8 @@ Format your response as a JSON object with the following structure:
   ]
 }`;
 
-    // Get the OpenAI model to use
-    const model = 'gpt-4o'; // Default to gpt-4o as it's a good balance
+    // Try GPT-3.5 first as it has broader access permissions
+    const model = 'gpt-3.5-turbo';
 
     console.log("Using model:", model);
     console.log("Sending prompt to OpenAI");
@@ -94,11 +94,20 @@ Format your response as a JSON object with the following structure:
       console.error("OpenAI API Error:", errorData);
       
       // Get detailed error message
-      const errorMessage = errorData.error?.message || response.statusText;
+      let errorMessage = errorData.error?.message || response.statusText;
+      
+      // Provide more user-friendly message for common errors
+      if (errorMessage.includes("insufficient permissions") || errorMessage.includes("Missing scopes")) {
+        errorMessage = "The API key doesn't have sufficient permissions. Please check that it's valid and has access to the required models.";
+      } else if (errorMessage.includes("invalid_api_key") || errorMessage.includes("Invalid API key")) {
+        errorMessage = "The OpenAI API key appears to be invalid. Please check that it's correct.";
+      } else if (errorMessage.includes("Rate limit")) {
+        errorMessage = "Rate limit reached for OpenAI API requests. Please try again later.";
+      }
       
       return new Response(JSON.stringify({ 
         success: false, 
-        error: `API Error (${response.status}): ${errorMessage}` 
+        error: errorMessage 
       }), {
         status: response.status,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
