@@ -8,7 +8,9 @@ export async function extractCompanyInfo(
   customPrompt?: string | null
 ): Promise<ApiResponse> {
   try {
-    // Call our Supabase Edge Function with the correct authentication
+    console.log("Calling extract-info edge function");
+    
+    // Call Supabase Edge Function with properly formatted parameters
     const { data, error } = await supabase.functions.invoke('extract-info', {
       body: {
         website,

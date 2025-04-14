@@ -14,32 +14,40 @@ serve(async (req) => {
   }
 
   try {
-    // Initialize Supabase client with the URL and anon key from the request
+    // Initialize Supabase client with environment variables
     const supabaseUrl = Deno.env.get('SUPABASE_URL') || '';
     const supabaseAnonKey = Deno.env.get('SUPABASE_ANON_KEY') || '';
+    
+    console.log("SUPABASE_URL:", supabaseUrl ? "Present" : "Missing");
+    console.log("SUPABASE_ANON_KEY:", supabaseAnonKey ? "Present" : "Missing");
+    
+    if (!supabaseUrl || !supabaseAnonKey) {
+      throw new Error("Missing Supabase environment variables");
+    }
+    
     const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
-    // Log authentication info for debugging
-    console.log("Auth headers present:", req.headers.has('authorization'));
-    console.log("API key header present:", req.headers.has('apikey'));
+    // Debug request headers
+    console.log("Headers received in request:");
+    for (const [key, value] of req.headers.entries()) {
+      console.log(`${key}: ${value.substring(0, 5)}...`);
+    }
 
-    // Retrieve the OpenAI API key from the database using the secured function
-    const { data, error } = await supabase.rpc('get_app_setting', { 
-      setting_id: 'openai_api_key' 
-    });
-
-    if (error || !data) {
-      console.error('Error retrieving API key:', error);
+    // Get OpenAI API key directly from environment variables
+    const apiKey = Deno.env.get('OPENAI_API_KEY');
+    
+    if (!apiKey) {
+      console.error("OPENAI_API_KEY not found in environment");
       return new Response(JSON.stringify({ 
-        success: false,
-        error: 'API key not found or error retrieving it' 
+        success: false, 
+        error: "OpenAI API key not configured on server" 
       }), {
         status: 500,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
-
-    const apiKey = data;
+    
+    console.log("OpenAI API Key retrieved successfully (first 5 chars):", apiKey.substring(0, 5));
     
     // Parse the request body to get parameters
     const { website, fields, customPrompt } = await req.json();
@@ -55,7 +63,7 @@ serve(async (req) => {
     }
 
     // Create a prompt that asks for specific information
-    const fieldsText = fields.map((field: { name: string }) => field.name).join(", ");
+    const fieldsText = fields.map((field) => field.name).join(", ");
     const prompt = customPrompt || 
     `Extract the following information about the company at ${website}:
 ${fieldsText}
@@ -73,7 +81,6 @@ Format your response as a JSON object with the following structure:
 
     console.log("Using model:", model);
     console.log("Sending prompt to OpenAI");
-    console.log("API Key first 5 chars:", apiKey.substring(0, 5)); // Debug only first few chars
 
     // Make the request to OpenAI
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
@@ -140,7 +147,7 @@ Format your response as a JSON object with the following structure:
 
       // Map the API response to our internal format
       if (parsedResults && parsedResults.results) {
-        const extractedInfo = parsedResults.results.map((item: any) => ({
+        const extractedInfo = parsedResults.results.map((item) => ({
           name: item.field,
           value: item.value
         }));
