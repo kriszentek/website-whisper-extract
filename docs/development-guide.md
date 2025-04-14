@@ -21,6 +21,9 @@ website-whisper/
 │   ├── utils/            # Utility functions
 │   ├── App.tsx           # Main application component
 │   └── main.tsx          # Application entry point
+├── supabase/
+│   ├── functions/        # Supabase Edge Functions
+│   └── config.toml       # Supabase configuration
 └── docs/                 # Documentation
 ```
 
@@ -42,17 +45,33 @@ To add a new feature to the application:
 
 ## Working with the OpenAI Integration
 
-### API Key Requirements
+### Server-side API Key
 
-To use the OpenAI integration, users need an API key with:
-- "model.request" scope enabled
-- Billing set up on their OpenAI account
-- Access to the requested model
+The application uses a server-side approach to OpenAI integration:
+
+1. The OpenAI API key is stored securely in the Supabase database
+2. Requests to OpenAI are made through a Supabase Edge Function
+3. The Edge Function retrieves the API key using a secure database function
+
+To update the OpenAI API key:
+
+1. Connect to the Supabase project
+2. Use SQL to update the app_settings table:
+   ```sql
+   -- If the key doesn't exist yet:
+   INSERT INTO app_settings (id, value, description)
+   VALUES ('openai_api_key', 'sk-your-api-key', 'OpenAI API key for Website Whisper');
+
+   -- If the key already exists:
+   UPDATE app_settings 
+   SET value = 'sk-your-new-api-key'
+   WHERE id = 'openai_api_key';
+   ```
 
 ### Adding Support for a New Model
 
 1. Update the `OpenAIModel` type in `types/index.ts`
-2. Add the new model option to the selector in `ApiKeyForm.tsx`
+2. Add the new model option to the Edge Function
 
 ## Error Handling
 
@@ -69,16 +88,18 @@ When extending error handling, follow the pattern of:
 ## Local Storage
 
 The application uses browser local storage for:
-- OpenAI API key
-- Selected model
+- Selected model preferences
 - Custom extraction fields
 - Custom prompt
 
 When adding new features that require persistence, follow the pattern in the existing utility files.
 
-## Supabase Integration
+## Supabase Edge Functions
 
-The application is integrated with Supabase for backend functionality. To use Supabase features:
+The application uses Supabase Edge Functions to handle server-side processing. To modify or extend these functions:
 
-1. Connect to your Supabase project by updating the client in `src/integrations/supabase/client.ts`
-2. Use the Supabase client for data storage, authentication, or other backend needs
+1. Edit the files in the `supabase/functions/` directory
+2. Update the `supabase/config.toml` file if needed
+3. Deploy the changes following the Supabase deployment guidelines
+
+When making changes to Edge Functions, be sure to test them thoroughly before deployment.

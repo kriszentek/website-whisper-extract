@@ -3,7 +3,7 @@
 
 ## OpenAI Service (`src/services/openai-service.ts`)
 
-The `openai-service.ts` file contains the logic for interacting with the OpenAI API to extract company information from websites.
+The `openai-service.ts` file contains the logic for interacting with the Supabase edge function to extract company information from websites.
 
 ### Main Function: `extractCompanyInfo`
 
@@ -27,27 +27,18 @@ async function extractCompanyInfo(
 
 #### Implementation Details:
 
-1. **API Key Validation**:
-   - Retrieves the API key from local storage
-   - Returns an error if no API key is found
+1. **Edge Function Integration**:
+   - Calls a secure Supabase edge function that handles the OpenAI API interaction
+   - Passes the website URL, fields, and any custom prompt to the function
 
-2. **Prompt Generation**:
-   - Uses the provided fields to build a structured prompt
-   - Uses custom prompt if provided, otherwise generates a default
-
-3. **OpenAI API Request**:
-   - Sends a chat completion request to OpenAI
-   - Uses the selected model from local storage
-   - Configures the request to return JSON formatted data
-
-4. **Error Handling**:
+2. **Error Handling**:
    - Handles API errors with detailed error messages
-   - Special handling for permission errors and model availability issues
+   - Provides appropriate feedback to the user interface
 
-5. **Response Processing**:
-   - Parses the JSON response from OpenAI
+3. **Response Processing**:
+   - Parses the JSON response from the edge function
    - Maps the response to the internal data structure
 
-6. **Data Formatting**:
+4. **Data Formatting**:
    - Structures the extracted data with timestamps
    - Returns in a consistent format for the UI to render

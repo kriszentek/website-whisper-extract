@@ -3,18 +3,16 @@
 
 ## API Key Storage (`src/utils/api-key-storage.ts`)
 
-Manages the storage and retrieval of the OpenAI API key and related settings in the browser's local storage.
+Manages the storage and retrieval of OpenAI model settings and custom prompts in the browser's local storage.
 
 ### Functions:
 
-- `saveApiKey(apiKey: string)`: Securely stores the API key in local storage
-- `getApiKey()`: Retrieves the stored API key
-- `hasApiKey()`: Checks if an API key exists
-- `removeApiKey()`: Removes the stored API key
 - `saveModel(model: string)`: Stores the selected OpenAI model
 - `getModel()`: Retrieves the stored model (defaults to 'gpt-4o')
 - `saveCustomPrompt(prompt: string | null)`: Stores a custom prompt
 - `getCustomPrompt()`: Retrieves the stored custom prompt
+
+> Note: API key functions (`saveApiKey`, `getApiKey`, `hasApiKey`, `removeApiKey`) are maintained for backwards compatibility but no longer store actual keys as the application now uses a server-side API key.
 
 ## Extract Fields Storage (`src/utils/extract-fields-storage.ts`)
 

@@ -1,20 +1,5 @@
 
-// Utility functions to handle API key storage securely in browser storage
-export const saveApiKey = (apiKey: string): void => {
-  localStorage.setItem('openai_api_key', apiKey);
-};
-
-export const getApiKey = (): string | null => {
-  return localStorage.getItem('openai_api_key');
-};
-
-export const hasApiKey = (): boolean => {
-  return !!getApiKey();
-};
-
-export const removeApiKey = (): void => {
-  localStorage.removeItem('openai_api_key');
-};
+// Utility functions to handle model and prompt storage in browser storage
 
 // Add functions to manage saved model
 export const saveModel = (model: string): void => {
@@ -22,7 +7,7 @@ export const saveModel = (model: string): void => {
 };
 
 export const getModel = (): string => {
-  return localStorage.getItem('openai_model') || 'gpt-4o'; // Changed default to gpt-4o
+  return localStorage.getItem('openai_model') || 'gpt-4o'; // Default to gpt-4o
 };
 
 // Add function to manage custom prompt
@@ -37,3 +22,9 @@ export const saveCustomPrompt = (prompt: string | null): void => {
 export const getCustomPrompt = (): string | null => {
   return localStorage.getItem('openai_custom_prompt');
 };
+
+// These are kept for backward compatibility but are no longer used
+export const saveApiKey = (): void => {};
+export const getApiKey = (): string => { return "server-managed"; };
+export const hasApiKey = (): boolean => { return true; }; 
+export const removeApiKey = (): void => {};

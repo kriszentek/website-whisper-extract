@@ -15,6 +15,7 @@ import { toast } from "sonner";
 import { Settings, Search, PlusCircle, Edit, Info } from "lucide-react";
 import { getCustomPrompt } from "@/utils/api-key-storage";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Badge } from "@/components/ui/badge";
 
 export default function Index() {
   const [companyData, setCompanyData] = useState<CompanyData | null>(null);
@@ -86,6 +87,7 @@ export default function Index() {
       <header className="mb-8 text-center">
         <h1 className="text-3xl font-bold tracking-tight">Website Whisper</h1>
         <p className="text-muted-foreground mt-2">Extract company information from websites using AI</p>
+        <Badge variant="outline" className="mt-2 bg-green-50">Server-powered AI - No API key required</Badge>
       </header>
 
       <Tabs 
@@ -104,7 +106,7 @@ export default function Index() {
           </TabsTrigger>
           <TabsTrigger value="settings" className="flex items-center gap-1">
             <Settings className="h-4 w-4" />
-            Settings
+            About
           </TabsTrigger>
         </TabsList>
 
@@ -149,14 +151,35 @@ export default function Index() {
         </TabsContent>
 
         <TabsContent value="settings" className="mt-6">
-          <ApiKeyForm onModelChange={handleModelChange} />
-          <div className="mt-6">
-            <h3 className="text-lg font-medium">About Website Whisper</h3>
-            <p className="text-muted-foreground mt-2">
-              This application uses OpenAI to extract company information from websites. 
-              Your API key is stored securely in your browser's local storage and is only used 
-              to make requests to the OpenAI API.
-            </p>
+          <div className="space-y-6">
+            <div>
+              <h3 className="text-lg font-medium">About Website Whisper</h3>
+              <p className="text-muted-foreground mt-2">
+                This application uses AI to extract company information from websites. 
+                All processing is handled securely on our servers - no API keys required!
+              </p>
+            </div>
+            
+            <div className="p-4 border rounded-lg bg-green-50">
+              <h4 className="font-medium flex items-center gap-2">
+                <Info className="h-4 w-4" /> 
+                Server-Powered AI
+              </h4>
+              <p className="text-sm mt-2">
+                Website Whisper is powered by a secure server-side implementation that handles API communication
+                with OpenAI. You can analyze websites without needing your own API key.
+              </p>
+            </div>
+            
+            <Alert className="bg-blue-50 border-blue-200">
+              <AlertDescription>
+                <p className="font-medium">Open Source Project</p>
+                <p className="text-sm mt-1">
+                  This is an open-source project. You can find the source code and documentation
+                  on GitHub.
+                </p>
+              </AlertDescription>
+            </Alert>
           </div>
         </TabsContent>
       </Tabs>
