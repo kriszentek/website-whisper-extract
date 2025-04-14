@@ -64,8 +64,8 @@ Format your response as a JSON object with the following structure:
   ]
 }`;
 
-    // Try GPT-3.5 first as it has broader access permissions
-    const model = 'gpt-3.5-turbo';
+    // Use gpt-4o as specified by the user
+    const model = 'gpt-4o';
 
     console.log("Using model:", model);
     console.log("Sending prompt to OpenAI");
@@ -103,6 +103,8 @@ Format your response as a JSON object with the following structure:
         errorMessage = "The OpenAI API key appears to be invalid. Please check that it's correct.";
       } else if (errorMessage.includes("Rate limit")) {
         errorMessage = "Rate limit reached for OpenAI API requests. Please try again later.";
+      } else if (errorMessage.includes("does not have access to model")) {
+        errorMessage = `Your OpenAI API key doesn't have access to the ${model} model. Please check your OpenAI account permissions and subscription.`;
       }
       
       return new Response(JSON.stringify({ 
