@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import WebsiteForm from "@/components/WebsiteForm";
 import ResultsCard from "@/components/ResultsCard";
@@ -11,7 +12,7 @@ import { DEFAULT_EXTRACT_FIELDS } from "@/utils/constants";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Separator } from "@/components/ui/separator";
 import { toast } from "sonner";
-import { Settings, Search, PlusCircle, Edit, Info } from "lucide-react";
+import { Search, PlusCircle } from "lucide-react";
 import { getCustomPrompt } from "@/utils/api-key-storage";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
@@ -100,7 +101,7 @@ export default function Index() {
         onValueChange={setActiveTab} 
         className="w-full"
       >
-        <TabsList className="grid w-full grid-cols-3">
+        <TabsList className="grid w-full grid-cols-2">
           <TabsTrigger value="analyze" className="flex items-center gap-1">
             <Search className="h-4 w-4" />
             Analyze
@@ -108,10 +109,6 @@ export default function Index() {
           <TabsTrigger value="customize" className="flex items-center gap-1">
             <PlusCircle className="h-4 w-4" />
             Customize
-          </TabsTrigger>
-          <TabsTrigger value="settings" className="flex items-center gap-1">
-            <Settings className="h-4 w-4" />
-            About
           </TabsTrigger>
         </TabsList>
 
@@ -133,7 +130,6 @@ export default function Index() {
           
           {apiError && (
             <Alert variant="destructive" className="bg-destructive/10">
-              <Info className="h-4 w-4" />
               <AlertDescription className="whitespace-pre-wrap">
                 <div className="font-semibold">API Error Details:</div>
                 <div className="text-sm mt-1">{apiError}</div>
@@ -154,40 +150,8 @@ export default function Index() {
             onRemoveField={handleRemoveField}
           />
         </TabsContent>
-
-        <TabsContent value="settings" className="mt-6">
-          <div className="space-y-6">
-            <div>
-              <h3 className="text-lg font-medium">About Website Whisper</h3>
-              <p className="text-muted-foreground mt-2">
-                This application uses AI to extract company information from websites. 
-                All processing is handled securely on our servers - no API key required!
-              </p>
-            </div>
-            
-            <div className="p-4 border rounded-lg bg-green-50">
-              <h4 className="font-medium flex items-center gap-2">
-                <Info className="h-4 w-4" /> 
-                Server-Powered AI
-              </h4>
-              <p className="text-sm mt-2">
-                Website Whisper is powered by a secure server-side implementation that handles API communication
-                with OpenAI. You can analyze websites without needing your own API key.
-              </p>
-            </div>
-            
-            <Alert className="bg-blue-50 border-blue-200">
-              <AlertDescription>
-                <p className="font-medium">Open Source Project</p>
-                <p className="text-sm mt-1">
-                  This is an open-source project. You can find the source code and documentation
-                  on GitHub.
-                </p>
-              </AlertDescription>
-            </Alert>
-          </div>
-        </TabsContent>
       </Tabs>
     </div>
   );
 }
+
