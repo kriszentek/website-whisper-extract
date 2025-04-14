@@ -28,3 +28,10 @@ export interface ApiKeyFormProps {
   onModelChange?: (model: OpenAIModel) => void;
 }
 
+// New prompt editor props
+export interface PromptEditorProps {
+  onPromptChange: (prompt: string | null) => void;
+  defaultPrompt: string;
+  website: string;
+  fields: ExtractField[];
+}

@@ -22,6 +22,18 @@ export const saveModel = (model: string): void => {
 };
 
 export const getModel = (): string => {
-  return localStorage.getItem('openai_model') || 'gpt-4o-mini';
+  return localStorage.getItem('openai_model') || 'gpt-4o'; // Changed default to gpt-4o
 };
 
+// Add function to manage custom prompt
+export const saveCustomPrompt = (prompt: string | null): void => {
+  if (prompt) {
+    localStorage.setItem('openai_custom_prompt', prompt);
+  } else {
+    localStorage.removeItem('openai_custom_prompt');
+  }
+};
+
+export const getCustomPrompt = (): string | null => {
+  return localStorage.getItem('openai_custom_prompt');
+};

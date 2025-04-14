@@ -4,6 +4,7 @@ import WebsiteForm from "@/components/WebsiteForm";
 import ResultsCard from "@/components/ResultsCard";
 import ApiKeyForm from "@/components/ApiKeyForm";
 import CustomFieldsManager from "@/components/CustomFieldsManager";
+import PromptEditor from "@/components/PromptEditor";
 import { CompanyData, ExtractField, OpenAIModel } from "@/types";
 import { extractCompanyInfo } from "@/services/openai-service";
 import { getExtractFields, addExtractField, removeExtractField } from "@/utils/extract-fields-storage";
@@ -11,17 +12,23 @@ import { DEFAULT_EXTRACT_FIELDS } from "@/utils/constants";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Separator } from "@/components/ui/separator";
 import { toast } from "sonner";
-import { Settings, Search, PlusCircle } from "lucide-react";
+import { Settings, Search, PlusCircle, Edit } from "lucide-react";
+import { getCustomPrompt } from "@/utils/api-key-storage";
 
 export default function Index() {
   const [companyData, setCompanyData] = useState<CompanyData | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [activeTab, setActiveTab] = useState("analyze");
   const [extractFields, setExtractFields] = useState<ExtractField[]>(DEFAULT_EXTRACT_FIELDS);
+  const [website, setWebsite] = useState<string>("");
+  const [customPrompt, setCustomPrompt] = useState<string | null>(null);
+  const [showPromptEditor, setShowPromptEditor] = useState(false);
 
   useEffect(() => {
     // Load extract fields from storage
     setExtractFields(getExtractFields());
+    // Load custom prompt
+    setCustomPrompt(getCustomPrompt());
   }, []);
 
   const handleAddField = (field: ExtractField) => {
@@ -36,9 +43,10 @@ export default function Index() {
 
   const handleWebsiteSubmit = async (website: string) => {
     setIsLoading(true);
+    setWebsite(website);
     
     try {
-      const response = await extractCompanyInfo(website, extractFields);
+      const response = await extractCompanyInfo(website, extractFields, customPrompt);
       
       if (response.success) {
         setCompanyData(response.data);
@@ -53,9 +61,17 @@ export default function Index() {
     }
   };
 
+  const handlePromptChange = (prompt: string | null) => {
+    setCustomPrompt(prompt);
+  };
+
   const handleModelChange = (model: OpenAIModel) => {
     // When model changes, we can clear previous data to avoid confusion
     setCompanyData(null);
+  };
+
+  const togglePromptEditor = () => {
+    setShowPromptEditor(!showPromptEditor);
   };
 
   return (
@@ -86,7 +102,21 @@ export default function Index() {
         </TabsList>
 
         <TabsContent value="analyze" className="space-y-6 mt-6">
-          <WebsiteForm onSubmit={handleWebsiteSubmit} isLoading={isLoading} />
+          <WebsiteForm 
+            onSubmit={handleWebsiteSubmit} 
+            isLoading={isLoading}
+            showPrompt={() => setShowPromptEditor(true)}
+          />
+          
+          {(showPromptEditor || !!customPrompt) && (
+            <PromptEditor
+              onPromptChange={handlePromptChange}
+              defaultPrompt=""
+              website={website}
+              fields={extractFields}
+            />
+          )}
+          
           <ResultsCard data={companyData} isLoading={isLoading} />
         </TabsContent>
 

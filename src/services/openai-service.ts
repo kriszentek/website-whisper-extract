@@ -2,7 +2,11 @@
 import { getApiKey, getModel } from "@/utils/api-key-storage";
 import { ExtractField, ApiResponse, CompanyData } from "@/types";
 
-export async function extractCompanyInfo(website: string, fields: ExtractField[]): Promise<ApiResponse> {
+export async function extractCompanyInfo(
+  website: string, 
+  fields: ExtractField[],
+  customPrompt?: string
+): Promise<ApiResponse> {
   const apiKey = getApiKey();
   const model = getModel();
   
@@ -16,7 +20,8 @@ export async function extractCompanyInfo(website: string, fields: ExtractField[]
   try {
     // Create a prompt that asks for specific information
     const fieldsText = fields.map(field => field.name).join(", ");
-    const prompt = `Extract the following information about the company at ${website}:
+    const prompt = customPrompt || 
+    `Extract the following information about the company at ${website}:
 ${fieldsText}
 
 Format your response as a JSON object with the following structure:
@@ -40,7 +45,8 @@ Format your response as a JSON object with the following structure:
           { role: "user", content: prompt }
         ],
         temperature: 0.5,
-        max_tokens: 1000
+        max_tokens: 1000,
+        response_format: { type: "json_object" } // Use the newer response format API
       })
     });
 
@@ -52,7 +58,7 @@ Format your response as a JSON object with the following structure:
       if (errorMessage.includes("insufficient permissions") || errorMessage.includes("Missing scopes")) {
         return { 
           success: false, 
-          error: "API Key Error: Your API key doesn't have the proper permissions. Please ensure it has model.request scope and is not restricted. You may need to check your OpenAI account settings or generate a new key." 
+          error: `API Key Error: Your API key doesn't have the proper permissions. Error: ${errorMessage}` 
         };
       }
       
@@ -68,10 +74,15 @@ Format your response as a JSON object with the following structure:
     try {
       // Extract JSON from the completion
       const content = data.choices[0].message.content;
-      // Find JSON data in the response
-      const jsonMatch = content.match(/\{[\s\S]*\}/);
-      const jsonText = jsonMatch ? jsonMatch[0] : content;
-      const parsedResults = JSON.parse(jsonText);
+      
+      // With response_format: { type: "json_object" }, content should already be valid JSON
+      let parsedResults;
+      try {
+        parsedResults = JSON.parse(content);
+      } catch (e) {
+        // If parsing fails, content might already be a JSON object
+        parsedResults = content;
+      }
 
       // Map the API response to our internal format
       if (parsedResults && parsedResults.results) {
@@ -106,4 +117,3 @@ Format your response as a JSON object with the following structure:
     };
   }
 }
-

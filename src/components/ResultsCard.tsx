@@ -19,7 +19,10 @@ export default function ResultsCard({ data, isLoading }: ResultsCardProps) {
             Company Information
           </CardTitle>
           <CardDescription>
-            <div className="w-40"><Skeleton className="h-4 w-full" /></div>
+            <div className="w-40">
+              {/* Fix DOM nesting warning by not nesting div inside p */}
+              <Skeleton className="h-4 w-full" />
+            </div>
           </CardDescription>
         </CardHeader>
         <CardContent>

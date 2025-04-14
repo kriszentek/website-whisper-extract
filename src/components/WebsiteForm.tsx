@@ -10,9 +10,10 @@ import { toast } from "sonner";
 interface WebsiteFormProps {
   onSubmit: (website: string) => void;
   isLoading: boolean;
+  showPrompt: () => void;
 }
 
-export default function WebsiteForm({ onSubmit, isLoading }: WebsiteFormProps) {
+export default function WebsiteForm({ onSubmit, isLoading, showPrompt }: WebsiteFormProps) {
   const [website, setWebsite] = useState("");
 
   const validateUrl = (url: string): boolean => {
@@ -52,6 +53,7 @@ export default function WebsiteForm({ onSubmit, isLoading }: WebsiteFormProps) {
       : `https://${trimmedWebsite}`;
 
     onSubmit(normalizedUrl);
+    showPrompt(); // Show the prompt editor after submitting
   };
 
   return (

@@ -33,7 +33,7 @@ export default function ApiKeyForm({ onModelChange }: ApiKeyFormProps = {}) {
   const [apiKey, setApiKey] = useState("");
   const [hasSavedKey, setHasSavedKey] = useState(false);
   const [isVisible, setIsVisible] = useState(false);
-  const [model, setModel] = useState<OpenAIModel>(getModel() as OpenAIModel || 'gpt-4o-mini');
+  const [model, setModel] = useState<OpenAIModel>(getModel() as OpenAIModel || 'gpt-4o'); // Changed default to gpt-4o
 
   useEffect(() => {
     const savedKey = getApiKey();
@@ -123,8 +123,8 @@ export default function ApiKeyForm({ onModelChange }: ApiKeyFormProps = {}) {
               <SelectValue placeholder="Select model" />
             </SelectTrigger>
             <SelectContent>
+              <SelectItem value="gpt-4o">GPT-4o (Default, balanced)</SelectItem>
               <SelectItem value="gpt-4o-mini">GPT-4o Mini (Faster, cheaper)</SelectItem>
-              <SelectItem value="gpt-4o">GPT-4o (More powerful)</SelectItem>
               <SelectItem value="gpt-4.5-preview">GPT-4.5 Preview (Most powerful)</SelectItem>
             </SelectContent>
           </Select>
@@ -136,7 +136,7 @@ export default function ApiKeyForm({ onModelChange }: ApiKeyFormProps = {}) {
         <Alert variant="destructive" className="bg-destructive/10">
           <AlertCircle className="h-4 w-4" />
           <AlertDescription>
-            If you're seeing API key permission errors, ensure your API key has access to the selected model, or try a different model.
+            If you're seeing API key permission errors, ensure your API key has the "model.request" scope and access to the selected model.
           </AlertDescription>
         </Alert>
       </CardContent>
