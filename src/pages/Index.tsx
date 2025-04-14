@@ -12,8 +12,9 @@ import { DEFAULT_EXTRACT_FIELDS } from "@/utils/constants";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Separator } from "@/components/ui/separator";
 import { toast } from "sonner";
-import { Settings, Search, PlusCircle, Edit } from "lucide-react";
+import { Settings, Search, PlusCircle, Edit, Info } from "lucide-react";
 import { getCustomPrompt } from "@/utils/api-key-storage";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 export default function Index() {
   const [companyData, setCompanyData] = useState<CompanyData | null>(null);
@@ -23,6 +24,7 @@ export default function Index() {
   const [website, setWebsite] = useState<string>("");
   const [customPrompt, setCustomPrompt] = useState<string | null>(null);
   const [showPromptEditor, setShowPromptEditor] = useState(false);
+  const [apiError, setApiError] = useState<string | null>(null);
 
   useEffect(() => {
     // Load extract fields from storage
@@ -44,6 +46,7 @@ export default function Index() {
   const handleWebsiteSubmit = async (website: string) => {
     setIsLoading(true);
     setWebsite(website);
+    setApiError(null);
     
     try {
       const response = await extractCompanyInfo(website, extractFields, customPrompt);
@@ -51,10 +54,13 @@ export default function Index() {
       if (response.success) {
         setCompanyData(response.data);
       } else {
+        setApiError(response.error || "Failed to extract information");
         toast.error(response.error || "Failed to extract information");
       }
     } catch (error) {
       console.error("Error extracting company info:", error);
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      setApiError(`An unexpected error occurred: ${errorMessage}`);
       toast.error("An unexpected error occurred");
     } finally {
       setIsLoading(false);
@@ -68,6 +74,7 @@ export default function Index() {
   const handleModelChange = (model: OpenAIModel) => {
     // When model changes, we can clear previous data to avoid confusion
     setCompanyData(null);
+    setApiError(null);
   };
 
   const togglePromptEditor = () => {
@@ -117,7 +124,19 @@ export default function Index() {
             />
           )}
           
-          <ResultsCard data={companyData} isLoading={isLoading} />
+          {apiError && (
+            <Alert variant="destructive" className="bg-destructive/10">
+              <Info className="h-4 w-4" />
+              <AlertDescription className="whitespace-pre-wrap">
+                <div className="font-semibold">API Error Details:</div>
+                <div className="text-sm mt-1">{apiError}</div>
+              </AlertDescription>
+            </Alert>
+          )}
+          
+          <div className="pt-2">
+            <ResultsCard data={companyData} isLoading={isLoading} />
+          </div>
         </TabsContent>
 
         <TabsContent value="customize" className="mt-6">

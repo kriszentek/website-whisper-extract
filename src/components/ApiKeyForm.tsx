@@ -22,7 +22,8 @@ import {
   Check, 
   Key, 
   Trash2,
-  AlertCircle 
+  AlertCircle,
+  ExternalLink
 } from "lucide-react";
 import { toast } from "sonner";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -33,7 +34,7 @@ export default function ApiKeyForm({ onModelChange }: ApiKeyFormProps = {}) {
   const [apiKey, setApiKey] = useState("");
   const [hasSavedKey, setHasSavedKey] = useState(false);
   const [isVisible, setIsVisible] = useState(false);
-  const [model, setModel] = useState<OpenAIModel>(getModel() as OpenAIModel || 'gpt-4o'); // Changed default to gpt-4o
+  const [model, setModel] = useState<OpenAIModel>(getModel() as OpenAIModel || 'gpt-4o');
 
   useEffect(() => {
     const savedKey = getApiKey();
@@ -47,6 +48,10 @@ export default function ApiKeyForm({ onModelChange }: ApiKeyFormProps = {}) {
     if (!apiKey.trim()) {
       toast.error("Please enter a valid API key");
       return;
+    }
+
+    if (!apiKey.startsWith('sk-')) {
+      toast.warning("The API key doesn't follow the expected format. OpenAI API keys typically start with 'sk-'");
     }
 
     saveApiKey(apiKey);
@@ -136,7 +141,25 @@ export default function ApiKeyForm({ onModelChange }: ApiKeyFormProps = {}) {
         <Alert variant="destructive" className="bg-destructive/10">
           <AlertCircle className="h-4 w-4" />
           <AlertDescription>
-            If you're seeing API key permission errors, ensure your API key has the "model.request" scope and access to the selected model.
+            <div className="space-y-2">
+              <p>If you're seeing API key permission errors, please check:</p>
+              <ul className="list-disc pl-5 text-xs space-y-1">
+                <li>Your API key is valid and not expired</li>
+                <li>Your OpenAI account has billing set up</li>
+                <li>Your API key has the "model.request" scope enabled</li>
+                <li>You have access to the selected model in your OpenAI account</li>
+              </ul>
+              <div className="pt-2">
+                <a 
+                  href="https://platform.openai.com/account/api-keys" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="text-xs flex items-center gap-1 text-primary hover:underline"
+                >
+                  Verify your API key settings on OpenAI <ExternalLink className="h-3 w-3" />
+                </a>
+              </div>
+            </div>
           </AlertDescription>
         </Alert>
       </CardContent>

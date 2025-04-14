@@ -32,6 +32,9 @@ Format your response as a JSON object with the following structure:
   ]
 }`;
 
+    console.log("Using model:", model);
+    console.log("Sending prompt to OpenAI:", prompt);
+
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
       headers: {
@@ -52,23 +55,35 @@ Format your response as a JSON object with the following structure:
 
     if (!response.ok) {
       const errorData = await response.json();
+      console.error("OpenAI API Error:", errorData);
+      
+      // Get detailed error message
       const errorMessage = errorData.error?.message || response.statusText;
       
       // Handle specific API key permission error
       if (errorMessage.includes("insufficient permissions") || errorMessage.includes("Missing scopes")) {
         return { 
           success: false, 
-          error: `API Key Error: Your API key doesn't have the proper permissions. Error: ${errorMessage}` 
+          error: `API Key Permission Error: Your API key doesn't have the necessary permissions. Error: ${errorMessage}`
+        };
+      }
+
+      // Handle possible model availability issues
+      if (errorMessage.includes("model")) {
+        return {
+          success: false,
+          error: `Model Error: ${errorMessage}. Try using a different model in settings.`
         };
       }
       
       return { 
         success: false, 
-        error: `API Error: ${errorMessage}` 
+        error: `API Error (${response.status}): ${errorMessage}` 
       };
     }
 
     const data = await response.json();
+    console.log("OpenAI API Response:", data);
     
     // Parse the completion to extract the JSON
     try {
@@ -111,6 +126,7 @@ Format your response as a JSON object with the following structure:
       };
     }
   } catch (error) {
+    console.error("Request Error:", error);
     return { 
       success: false, 
       error: `Request failed: ${error instanceof Error ? error.message : String(error)}` 
