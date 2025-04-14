@@ -30,15 +30,19 @@ Format your response as a JSON object with the following structure:
 
   useEffect(() => {
     // Load saved prompt or generate default
-    const customPrompt = getCustomPrompt();
+    const fetchPrompt = async () => {
+      const customPrompt = await getCustomPrompt();
+      
+      if (customPrompt) {
+        setPromptText(customPrompt);
+        setSavedPrompt(customPrompt);
+      } else {
+        const newDefaultPrompt = generateDefaultPrompt();
+        setPromptText(newDefaultPrompt);
+      }
+    };
     
-    if (customPrompt) {
-      setPromptText(customPrompt);
-      setSavedPrompt(customPrompt);
-    } else {
-      const newDefaultPrompt = generateDefaultPrompt();
-      setPromptText(newDefaultPrompt);
-    }
+    fetchPrompt();
   }, [website, fields]);
 
   const handleSavePrompt = () => {

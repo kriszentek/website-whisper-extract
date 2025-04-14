@@ -30,8 +30,14 @@ export default function Index() {
   useEffect(() => {
     // Load extract fields from storage
     setExtractFields(getExtractFields());
+    
     // Load custom prompt
-    setCustomPrompt(getCustomPrompt());
+    const fetchPrompt = async () => {
+      const prompt = await getCustomPrompt();
+      setCustomPrompt(prompt);
+    };
+    
+    fetchPrompt();
   }, []);
 
   const handleAddField = (field: ExtractField) => {
