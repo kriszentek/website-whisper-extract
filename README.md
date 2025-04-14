@@ -1,8 +1,23 @@
-# Welcome to your Lovable project
+
+# Welcome to Website Whisper
+
+Website Whisper is an AI-powered tool that extracts structured company information from websites using OpenAI's API.
 
 ## Project info
 
 **URL**: https://lovable.dev/projects/30c32162-1c30-4386-9478-eec8f6c6a5bb
+
+## Features
+
+- Extract company information from any website
+- Customize the fields you want to extract
+- Edit the AI prompt for specialized extraction
+- Save your API key securely
+- Choose from different OpenAI models
+
+## Documentation
+
+For detailed documentation on the project implementation, please see the [documentation directory](./docs/README.md).
 
 ## How can I edit this code?
 
@@ -59,6 +74,8 @@ This project is built with:
 - React
 - shadcn-ui
 - Tailwind CSS
+- OpenAI API
+- Supabase (integration ready)
 
 ## How can I deploy this project?
 
