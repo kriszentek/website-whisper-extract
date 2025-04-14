@@ -8,7 +8,7 @@ export async function extractCompanyInfo(
   customPrompt?: string | null
 ): Promise<ApiResponse> {
   try {
-    // Call our Supabase Edge Function instead of directly calling OpenAI
+    // Call our Supabase Edge Function with the correct authentication
     const { data, error } = await supabase.functions.invoke('extract-info', {
       body: {
         website,

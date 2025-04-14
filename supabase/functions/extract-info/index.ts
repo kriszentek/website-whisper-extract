@@ -19,6 +19,10 @@ serve(async (req) => {
     const supabaseAnonKey = Deno.env.get('SUPABASE_ANON_KEY') || '';
     const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
+    // Log authentication info for debugging
+    console.log("Auth headers present:", req.headers.has('authorization'));
+    console.log("API key header present:", req.headers.has('apikey'));
+
     // Retrieve the OpenAI API key from the database using the secured function
     const { data, error } = await supabase.rpc('get_app_setting', { 
       setting_id: 'openai_api_key' 
