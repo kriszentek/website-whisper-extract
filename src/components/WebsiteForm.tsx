@@ -4,7 +4,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Globe, Search } from "lucide-react";
-import { hasApiKey } from "@/utils/api-key-storage";
 import { toast } from "sonner";
 
 interface WebsiteFormProps {
@@ -30,11 +29,6 @@ export default function WebsiteForm({ onSubmit, isLoading, showPrompt }: Website
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-
-    if (!hasApiKey()) {
-      toast.error("Please add your OpenAI API key in settings first");
-      return;
-    }
 
     const trimmedWebsite = website.trim();
     if (!trimmedWebsite) {

@@ -69,6 +69,7 @@ Format your response as a JSON object with the following structure:
 
     console.log("Using model:", model);
     console.log("Sending prompt to OpenAI");
+    console.log("API Key first 5 chars:", apiKey.substring(0, 5)); // Debug only first few chars
 
     // Make the request to OpenAI
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
@@ -91,7 +92,7 @@ Format your response as a JSON object with the following structure:
 
     if (!response.ok) {
       const errorData = await response.json();
-      console.error("OpenAI API Error:", errorData);
+      console.error("OpenAI API Error:", JSON.stringify(errorData));
       
       // Get detailed error message
       let errorMessage = errorData.error?.message || response.statusText;
