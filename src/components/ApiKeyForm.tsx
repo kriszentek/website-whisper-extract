@@ -4,9 +4,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { 
-  saveApiKey, 
-  getApiKey, 
-  removeApiKey, 
   saveModel, 
   getModel 
 } from "@/utils/api-key-storage";
@@ -32,43 +29,32 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 
 export default function ApiKeyForm({ onModelChange }: ApiKeyFormProps = {}) {
   const [apiKey, setApiKey] = useState("");
-  const [hasSavedKey, setHasSavedKey] = useState(false);
+  const [hasSavedKey, setHasSavedKey] = useState(true); // Always true with server-side key
   const [isVisible, setIsVisible] = useState(false);
   const [model, setModel] = useState<OpenAIModel>(getModel() as OpenAIModel || 'gpt-4o');
 
+  // No need to check for API key as it's now handled on the server
   useEffect(() => {
-    const savedKey = getApiKey();
-    if (savedKey) {
-      setApiKey(savedKey);
-      setHasSavedKey(true);
-    }
+    // Set as true since we're using server-side API key
+    setHasSavedKey(true);
+    // Mask the display with a placeholder
+    setApiKey("••••••••••••••••••••••••••");
   }, []);
 
   const handleSaveKey = () => {
-    if (!apiKey.trim()) {
-      toast.error("Please enter a valid API key");
-      return;
-    }
-
-    if (!apiKey.startsWith('sk-')) {
-      toast.warning("The API key doesn't follow the expected format. OpenAI API keys typically start with 'sk-'");
-    }
-
-    saveApiKey(apiKey);
-    setHasSavedKey(true);
-    toast.success("API key saved successfully");
+    // Not storing the key locally anymore, just inform user
+    toast.info("API keys are now managed on the server");
   };
 
   const handleRemoveKey = () => {
-    removeApiKey();
-    setApiKey("");
-    setHasSavedKey(false);
-    setIsVisible(false);
-    toast.info("API key removed");
+    // Just for UI consistency
+    toast.info("API keys are managed on the server and cannot be removed from the client");
   };
 
   const toggleVisibility = () => {
-    setIsVisible(!isVisible);
+    // Since we don't actually have the key, just show a message
+    toast.info("The actual API key is securely stored on the server");
+    setIsVisible(false);
   };
 
   const handleModelChange = (value: string) => {
@@ -86,39 +72,30 @@ export default function ApiKeyForm({ onModelChange }: ApiKeyFormProps = {}) {
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <Key className="h-5 w-5" />
-          OpenAI API Key
+          OpenAI API Settings
         </CardTitle>
         <CardDescription>
-          {hasSavedKey 
-            ? "Your OpenAI API key is securely stored in your browser's local storage."
-            : "Enter your OpenAI API key to use the company info extraction features."}
+          API keys are now securely managed on the server. You can still select which OpenAI model to use.
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="space-y-2">
           <div className="flex items-center justify-between">
             <Label htmlFor="apiKey">API Key</Label>
-            {hasSavedKey && (
-              <Button 
-                variant="ghost" 
-                size="sm" 
-                onClick={toggleVisibility} 
-                className="h-7 px-2 text-xs"
-              >
-                {isVisible ? "Hide" : "Show"}
-              </Button>
-            )}
           </div>
           <div className="flex space-x-2">
             <Input
               id="apiKey"
-              type={isVisible ? "text" : "password"}
-              placeholder="sk-..."
+              type="password"
+              placeholder="Managed by server"
               value={apiKey}
-              onChange={(e) => setApiKey(e.target.value)}
-              className="flex-1"
+              disabled={true}
+              className="flex-1 bg-muted"
             />
           </div>
+          <p className="text-xs text-muted-foreground">
+            The API key is now securely managed on the server
+          </p>
         </div>
 
         <div className="space-y-2">
@@ -134,48 +111,24 @@ export default function ApiKeyForm({ onModelChange }: ApiKeyFormProps = {}) {
             </SelectContent>
           </Select>
           <p className="text-xs text-muted-foreground">
-            Select a different model if you're experiencing permission issues
+            Select a different model if you're experiencing issues with the default model
           </p>
         </div>
 
-        <Alert variant="destructive" className="bg-destructive/10">
+        <Alert className="bg-blue-50/50 border-blue-200">
           <AlertCircle className="h-4 w-4" />
           <AlertDescription>
             <div className="space-y-2">
-              <p>If you're seeing API key permission errors, please check:</p>
-              <ul className="list-disc pl-5 text-xs space-y-1">
-                <li>Your API key is valid and not expired</li>
-                <li>Your OpenAI account has billing set up</li>
-                <li>Your API key has the "model.request" scope enabled</li>
-                <li>You have access to the selected model in your OpenAI account</li>
-              </ul>
-              <div className="pt-2">
-                <a 
-                  href="https://platform.openai.com/account/api-keys" 
-                  target="_blank" 
-                  rel="noopener noreferrer"
-                  className="text-xs flex items-center gap-1 text-primary hover:underline"
-                >
-                  Verify your API key settings on OpenAI <ExternalLink className="h-3 w-3" />
-                </a>
-              </div>
+              <p className="font-medium">Server-Powered AI</p>
+              <p className="text-sm">This application now uses a server-side API key. You no longer need to provide your own OpenAI API key.</p>
             </div>
           </AlertDescription>
         </Alert>
       </CardContent>
-      <CardFooter className="flex justify-between">
-        <Button 
-          variant="outline" 
-          onClick={handleRemoveKey}
-          disabled={!hasSavedKey}
-          className="gap-2"
-        >
-          <Trash2 className="h-4 w-4" />
-          Remove
-        </Button>
-        <Button onClick={handleSaveKey} className="gap-2">
+      <CardFooter className="flex justify-end">
+        <Button onClick={handleModelChange.bind(null, model)} className="gap-2">
           <Check className="h-4 w-4" />
-          Save Key
+          Apply Model
         </Button>
       </CardFooter>
     </Card>
