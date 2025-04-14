@@ -1,22 +1,19 @@
 
-import { getCustomPrompt } from "@/utils/api-key-storage";
 import { ExtractField, ApiResponse, CompanyData } from "@/types";
 import { supabase } from "@/integrations/supabase/client";
 
 export async function extractCompanyInfo(
   website: string, 
   fields: ExtractField[],
-  customPrompt?: string
+  customPrompt?: string | null
 ): Promise<ApiResponse> {
   try {
-    const customPromptValue = customPrompt || getCustomPrompt();
-    
     // Call our Supabase Edge Function instead of directly calling OpenAI
     const { data, error } = await supabase.functions.invoke('extract-info', {
       body: {
         website,
         fields,
-        customPrompt: customPromptValue
+        customPrompt
       }
     });
 

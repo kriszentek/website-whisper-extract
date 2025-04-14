@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import WebsiteForm from "@/components/WebsiteForm";
 import ResultsCard from "@/components/ResultsCard";
@@ -162,7 +161,7 @@ export default function Index() {
               <h3 className="text-lg font-medium">About Website Whisper</h3>
               <p className="text-muted-foreground mt-2">
                 This application uses AI to extract company information from websites. 
-                All processing is handled securely on our servers - no API keys required!
+                All processing is handled securely on our servers - no API key required!
               </p>
             </div>
             

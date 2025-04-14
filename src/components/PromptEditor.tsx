@@ -45,23 +45,23 @@ Format your response as a JSON object with the following structure:
     fetchPrompt();
   }, [website, fields]);
 
-  const handleSavePrompt = () => {
+  const handleSavePrompt = async () => {
     if (promptText.trim() === "") {
       toast.error("Prompt cannot be empty");
       return;
     }
 
-    saveCustomPrompt(promptText);
+    await saveCustomPrompt(promptText);
     setSavedPrompt(promptText);
     setIsEditing(false);
     onPromptChange(promptText);
     toast.success("Custom prompt saved");
   };
 
-  const handleResetPrompt = () => {
+  const handleResetPrompt = async () => {
     const defaultPromptText = generateDefaultPrompt();
     setPromptText(defaultPromptText);
-    saveCustomPrompt(null);
+    await saveCustomPrompt(null);
     setSavedPrompt(null);
     onPromptChange(null);
     setIsEditing(false);
