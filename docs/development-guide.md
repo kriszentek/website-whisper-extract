@@ -49,29 +49,22 @@ To add a new feature to the application:
 
 The application uses a server-side approach to OpenAI integration:
 
-1. The OpenAI API key is stored securely in the Supabase database
+1. The OpenAI API key is stored securely as a Supabase environment variable
 2. Requests to OpenAI are made through a Supabase Edge Function
-3. The Edge Function retrieves the API key using a secure database function
+3. The Edge Function retrieves the API key from environment variables
 
 To update the OpenAI API key:
 
-1. Connect to the Supabase project
-2. Use SQL to update the app_settings table:
-   ```sql
-   -- If the key doesn't exist yet:
-   INSERT INTO app_settings (id, value, description)
-   VALUES ('openai_api_key', 'sk-your-api-key', 'OpenAI API key for Website Whisper');
-
-   -- If the key already exists:
-   UPDATE app_settings 
-   SET value = 'sk-your-new-api-key'
-   WHERE id = 'openai_api_key';
-   ```
+1. Navigate to the Supabase dashboard
+2. Go to Project Settings > API
+3. Add or update the `OPENAI_API_KEY` environment variable
+4. Deploy the updated Edge Function
 
 ### Adding Support for a New Model
 
 1. Update the `OpenAIModel` type in `types/index.ts`
 2. Add the new model option to the Edge Function
+3. Update any relevant UI components
 
 ## Error Handling
 
@@ -85,21 +78,23 @@ When extending error handling, follow the pattern of:
 2. Returning structured error responses
 3. Displaying user-friendly messages in the UI
 
-## Local Storage
-
-The application uses browser local storage for:
-- Selected model preferences
-- Custom extraction fields
-- Custom prompt
-
-When adding new features that require persistence, follow the pattern in the existing utility files.
-
 ## Supabase Edge Functions
 
 The application uses Supabase Edge Functions to handle server-side processing. To modify or extend these functions:
 
 1. Edit the files in the `supabase/functions/` directory
 2. Update the `supabase/config.toml` file if needed
-3. Deploy the changes following the Supabase deployment guidelines
+3. Deploy the changes using the Supabase CLI:
+   ```bash
+   supabase functions deploy extract-info
+   ```
 
-When making changes to Edge Functions, be sure to test them thoroughly before deployment.
+When making changes to Edge Functions, be sure to test them thoroughly before deployment. Use the logs in the Supabase dashboard to troubleshoot issues.
+
+## Best Practices
+
+- Keep components small and focused on a single responsibility
+- Use TypeScript types consistently
+- Follow the existing patterns for error handling and state management
+- Document any significant changes
+- Test changes thoroughly before deploying to production

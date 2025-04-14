@@ -11,7 +11,7 @@ The `openai-service.ts` file contains the logic for interacting with the Supabas
 async function extractCompanyInfo(
   website: string, 
   fields: ExtractField[],
-  customPrompt?: string
+  customPrompt?: string | null
 ): Promise<ApiResponse>
 ```
 
@@ -27,7 +27,7 @@ async function extractCompanyInfo(
 
 #### Implementation Details:
 
-1. **Edge Function Integration**:
+1. **Supabase Edge Function Integration**:
    - Calls a secure Supabase edge function that handles the OpenAI API interaction
    - Passes the website URL, fields, and any custom prompt to the function
 
@@ -39,6 +39,28 @@ async function extractCompanyInfo(
    - Parses the JSON response from the edge function
    - Maps the response to the internal data structure
 
-4. **Data Formatting**:
-   - Structures the extracted data with timestamps
-   - Returns in a consistent format for the UI to render
+4. **Security**:
+   - Does not require an API key from the user
+   - All sensitive API communication happens server-side
+
+### Edge Function: `extract-info`
+
+The Edge Function performs the actual communication with OpenAI:
+
+1. Retrieves the OpenAI API key from environment variables
+2. Constructs an appropriate prompt based on the website URL and fields to extract
+3. Makes a request to the OpenAI API
+4. Processes the response
+5. Returns the structured data to the client
+
+#### Error Handling in the Edge Function:
+
+The Edge Function handles various error scenarios:
+
+- Missing API key
+- Invalid API key
+- OpenAI API errors
+- Malformed responses
+- Timeout issues
+
+Each error is logged and returned with a clear message to help troubleshooting.

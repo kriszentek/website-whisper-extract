@@ -70,25 +70,61 @@ The application handles several types of API errors:
    - Issues with the OpenAI service
    - Retry the request later
 
-## Supabase Integration
+## Supabase Edge Function
 
-The application is set up to use Supabase as a backend service. The Supabase client is configured in `src/integrations/supabase/client.ts`.
+The application uses a Supabase Edge Function to securely communicate with the OpenAI API.
 
-### Client Configuration
+### Edge Function: `extract-info`
 
-```typescript
-import { createClient } from '@supabase/supabase-js';
-import type { Database } from './types';
-
-const SUPABASE_URL = "https://crozbkbvsrqnegoncmhp.supabase.co";
-const SUPABASE_PUBLISHABLE_KEY = "YOUR_PUBLISHABLE_KEY";
-
-export const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
+#### Endpoint:
+```
+POST https://<your-project-ref>.supabase.co/functions/v1/extract-info
 ```
 
-The application is currently set up for Supabase integration but does not actively use Supabase features. This integration provides an opportunity for future enhancements such as:
+#### Request Body:
+```json
+{
+  "website": "https://example.com",
+  "fields": [
+    { "id": "company_name", "name": "Company Name" },
+    { "id": "industry", "name": "Industry" }
+  ],
+  "customPrompt": "Optional custom prompt to override the default"
+}
+```
 
-- User authentication
-- Storing extracted company data
-- Sharing extraction results
-- Creating team collaboration features
+#### Response:
+```json
+{
+  "success": true,
+  "data": {
+    "website": "https://example.com",
+    "info": [
+      { "name": "Company Name", "value": "Example Corp" },
+      { "name": "Industry", "value": "Technology" }
+    ],
+    "timestamp": 1631234567890
+  }
+}
+```
+
+#### Error Response:
+```json
+{
+  "success": false,
+  "error": "Detailed error message"
+}
+```
+
+### Security
+
+The Edge Function:
+1. Retrieves the OpenAI API key from secure environment variables
+2. Does not require authentication from the client
+3. Validates input parameters
+4. Handles errors gracefully
+
+This approach ensures that:
+- The OpenAI API key is never exposed to the client
+- API requests are properly authenticated
+- The application can be used without requiring users to obtain their own API keys
