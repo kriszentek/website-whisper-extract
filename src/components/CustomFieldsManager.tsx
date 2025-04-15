@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -36,11 +37,12 @@ export default function CustomFieldsManager({
     // Create a simple ID from the name
     const fieldId = `custom_${newFieldName.toLowerCase().replace(/\s+/g, '_')}_${Date.now()}`;
     
-    await onAddField({
+    const newField = {
       id: fieldId,
       name: newFieldName.trim()
-    });
+    };
     
+    await onAddField(newField);
     setNewFieldName("");
     toast.success(`Added new field: ${newFieldName}`);
   };
@@ -64,6 +66,11 @@ export default function CustomFieldsManager({
                 value={newFieldName}
                 onChange={(e) => setNewFieldName(e.target.value)}
                 className="flex-1"
+                onKeyPress={(e) => {
+                  if (e.key === 'Enter') {
+                    handleAddField();
+                  }
+                }}
               />
               <Button onClick={handleAddField} className="gap-1">
                 <Plus className="h-4 w-4" />

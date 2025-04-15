@@ -28,19 +28,17 @@ export default function Index() {
   const [apiError, setApiError] = useState<string | null>(null);
   const [fieldsLoaded, setFieldsLoaded] = useState(false);
 
-  // Load fields only once when component mounts
-  useEffect(() => {
-    const loadFields = async () => {
-      const fields = await getExtractFields();
-      setExtractFields(fields);
-      setFieldsLoaded(true);
-    };
-    
-    loadFields();
-  }, []);
+  // Function to load fields
+  const loadFields = async () => {
+    const fields = await getExtractFields();
+    setExtractFields(fields);
+    setFieldsLoaded(true);
+  };
 
-  // Load custom prompt separately
+  // Load fields and prompt when component mounts
   useEffect(() => {
+    loadFields();
+    
     const fetchPrompt = async () => {
       const prompt = await getCustomPrompt();
       setCustomPrompt(prompt);
@@ -49,7 +47,7 @@ export default function Index() {
     fetchPrompt();
   }, []);
 
-  // When fields change and we've loaded already, regenerate the prompt
+  // When fields change and we've loaded already, update the prompt editor
   useEffect(() => {
     if (fieldsLoaded && website) {
       setShowPromptEditor(true);
@@ -58,14 +56,14 @@ export default function Index() {
 
   const handleAddField = async (field: ExtractField) => {
     await addExtractField(field);
-    const updatedFields = await getExtractFields();
-    setExtractFields(updatedFields);
+    // Reload fields to include the new one
+    await loadFields();
   };
 
   const handleRemoveField = async (id: string) => {
     await removeExtractField(id);
-    const updatedFields = await getExtractFields();
-    setExtractFields(updatedFields);
+    // Reload fields after removal
+    await loadFields();
   };
 
   const handleWebsiteSubmit = async (website: string) => {
@@ -78,6 +76,7 @@ export default function Index() {
       
       if (response.success) {
         setCompanyData(response.data);
+        setShowPromptEditor(true); // Always show prompt editor after successful analysis
       } else {
         setApiError(response.error || "Failed to extract information");
         toast.error(response.error || "Failed to extract information");
@@ -105,6 +104,14 @@ export default function Index() {
     setShowPromptEditor(!showPromptEditor);
   };
 
+  // When tab changes to customize, ensure fields are loaded
+  const handleTabChange = (value: string) => {
+    setActiveTab(value);
+    if (value === "customize") {
+      loadFields();
+    }
+  };
+
   return (
     <div className="container max-w-4xl py-8 px-4">
       <header className="mb-8 text-center">
@@ -115,7 +122,7 @@ export default function Index() {
 
       <Tabs 
         value={activeTab} 
-        onValueChange={setActiveTab} 
+        onValueChange={handleTabChange} 
         className="w-full"
       >
         <TabsList className="grid w-full grid-cols-2">
