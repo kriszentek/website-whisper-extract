@@ -26,6 +26,7 @@ export async function fetchExtractFields(): Promise<ExtractField[]> {
 
 export async function addExtractField(field: ExtractField): Promise<boolean> {
   try {
+    console.log('Adding field to Supabase:', field);
     const { error } = await supabase
       .from('extract_fields')
       .insert({ 
@@ -47,6 +48,7 @@ export async function addExtractField(field: ExtractField): Promise<boolean> {
 
 export async function removeExtractField(fieldId: string): Promise<boolean> {
   try {
+    console.log('Removing field from Supabase, field_id:', fieldId);
     const { error } = await supabase
       .from('extract_fields')
       .delete()

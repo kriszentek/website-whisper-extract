@@ -25,6 +25,7 @@ export const getExtractFields = async (): Promise<ExtractField[]> => {
 
 export const addExtractField = async (field: ExtractField): Promise<void> => {
   try {
+    console.log('Adding extract field:', field);
     const success = await addField(field);
     
     if (success) {
@@ -39,6 +40,7 @@ export const addExtractField = async (field: ExtractField): Promise<void> => {
 
 export const removeExtractField = async (fieldId: string): Promise<void> => {
   try {
+    console.log('Removing extract field, id:', fieldId);
     const success = await removeField(fieldId);
     
     if (success) {
