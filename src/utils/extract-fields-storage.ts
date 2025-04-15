@@ -3,17 +3,20 @@ import { ExtractField } from "@/types";
 import { DEFAULT_EXTRACT_FIELDS } from "./constants";
 import { fetchExtractFields, addExtractField as addField, removeExtractField as removeField } from "@/services/extract-fields-service";
 
-// Storage key
-const STORAGE_KEY = 'website-whisper-extract-fields';
-
 export const getExtractFields = async (): Promise<ExtractField[]> => {
   try {
-    // Get custom fields from localStorage via service
     const customFields = await fetchExtractFields();
-    console.log('Retrieved fields from localStorage:', customFields);
+    console.log('Retrieved fields from Supabase:', customFields);
     
-    // Combine with default fields
-    return [...DEFAULT_EXTRACT_FIELDS, ...customFields];
+    // Combine default fields with custom fields, preventing duplicates
+    const combinedFields = [
+      ...DEFAULT_EXTRACT_FIELDS, 
+      ...customFields.filter(cf => 
+        !DEFAULT_EXTRACT_FIELDS.some(df => df.id === cf.field_id)
+      ).map(cf => ({ id: cf.field_id, name: cf.name }))
+    ];
+    
+    return combinedFields;
   } catch (error) {
     console.error('Error fetching extract fields:', error);
     return DEFAULT_EXTRACT_FIELDS;
