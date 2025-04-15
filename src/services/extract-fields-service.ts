@@ -1,65 +1,60 @@
 
 import { ExtractField } from "@/types";
-import { supabase } from "@/integrations/supabase/client";
 
+// These functions are kept as placeholders but will use localStorage exclusively
 export async function fetchExtractFields(): Promise<ExtractField[]> {
   try {
-    const { data, error } = await supabase
-      .from('extract_fields')
-      .select('field_id, name')
-      .order('created_at', { ascending: true });
-
-    if (error) {
-      console.error('Error fetching extract fields:', error);
-      throw error;
+    // Get fields from localStorage
+    const fieldsJson = localStorage.getItem('website-whisper-extract-fields');
+    if (!fieldsJson) {
+      return [];
     }
-
-    return data.map(field => ({
-      id: field.field_id,
-      name: field.name
-    }));
+    
+    return JSON.parse(fieldsJson);
   } catch (error) {
-    console.error('Failed to fetch extract fields:', error);
-    throw error;
+    console.error('Failed to fetch extract fields from localStorage:', error);
+    return [];
   }
 }
 
 export async function addExtractField(field: ExtractField): Promise<boolean> {
   try {
-    const { error } = await supabase
-      .from('extract_fields')
-      .insert([{
-        field_id: field.id,
-        name: field.name
-      }]);
-
-    if (error) {
-      console.error('Error adding extract field:', error);
-      throw error;
-    }
-
+    // Get existing fields
+    const fieldsJson = localStorage.getItem('website-whisper-extract-fields');
+    const fields = fieldsJson ? JSON.parse(fieldsJson) : [];
+    
+    // Add new field
+    fields.push(field);
+    
+    // Save back to localStorage
+    localStorage.setItem('website-whisper-extract-fields', JSON.stringify(fields));
+    
     return true;
   } catch (error) {
-    console.error('Failed to add extract field:', error);
-    throw error;
+    console.error('Failed to add extract field to localStorage:', error);
+    return false;
   }
 }
 
 export async function removeExtractField(fieldId: string): Promise<boolean> {
   try {
-    const { error } = await supabase
-      .from('extract_fields')
-      .delete()
-      .eq('field_id', fieldId);
-
-    if (error) {
-      console.error('Error removing extract field:', error);
-      throw error;
+    // Get existing fields
+    const fieldsJson = localStorage.getItem('website-whisper-extract-fields');
+    if (!fieldsJson) {
+      return true; // Nothing to remove
     }
-
+    
+    const fields = JSON.parse(fieldsJson);
+    
+    // Filter out the field to remove
+    const updatedFields = fields.filter((f: ExtractField) => f.id !== fieldId);
+    
+    // Save back to localStorage
+    localStorage.setItem('website-whisper-extract-fields', JSON.stringify(updatedFields));
+    
     return true;
   } catch (error) {
-    console.error('Failed to remove extract field:', error);
-    throw error;
+    console.error('Failed to remove extract field from localStorage:', error);
+    return false;
   }
 }

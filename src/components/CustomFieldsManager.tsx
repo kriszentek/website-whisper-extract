@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -22,13 +22,16 @@ export default function CustomFieldsManager({
   onRemoveField 
 }: CustomFieldsManagerProps) {
   const [newFieldName, setNewFieldName] = useState("");
+  const [customFields, setCustomFields] = useState<ExtractField[]>([]);
   
-  // Filter out default fields to get only custom fields
-  const customFields = fields.filter(
-    field => !defaultFields.some(df => df.id === field.id)
-  );
-
-  console.log('Custom fields in manager:', customFields);
+  // Filter out default fields to get only custom fields when fields prop changes
+  useEffect(() => {
+    const filtered = fields.filter(
+      field => !defaultFields.some(df => df.id === field.id)
+    );
+    setCustomFields(filtered);
+    console.log('Custom fields in manager:', filtered);
+  }, [fields, defaultFields]);
 
   const handleAddField = () => {
     if (!newFieldName.trim()) {
@@ -46,6 +49,18 @@ export default function CustomFieldsManager({
     
     onAddField(newField);
     setNewFieldName("");
+    
+    // Immediately add the field to the local state for instant UI feedback
+    setCustomFields(prev => [...prev, newField]);
+    
+    toast.success(`Added field: ${newFieldName}`);
+  };
+
+  const handleRemoveField = (id: string) => {
+    onRemoveField(id);
+    
+    // Immediately remove from local state for instant UI feedback
+    setCustomFields(prev => prev.filter(field => field.id !== id));
   };
 
   return (
@@ -90,7 +105,7 @@ export default function CustomFieldsManager({
                     <Button 
                       variant="ghost" 
                       size="sm" 
-                      onClick={() => onRemoveField(field.id)}
+                      onClick={() => handleRemoveField(field.id)}
                       className="h-8 w-8 p-0"
                     >
                       <Trash2 className="h-4 w-4 text-destructive" />
