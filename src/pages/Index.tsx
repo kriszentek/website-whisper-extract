@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import WebsiteForm from "@/components/WebsiteForm";
 import ResultsCard from "@/components/ResultsCard";
@@ -28,10 +27,13 @@ export default function Index() {
   const [apiError, setApiError] = useState<string | null>(null);
 
   useEffect(() => {
-    // Load extract fields from storage
-    setExtractFields(getExtractFields());
+    const loadFields = async () => {
+      const fields = await getExtractFields();
+      setExtractFields(fields);
+    };
     
-    // Load custom prompt
+    loadFields();
+    
     const fetchPrompt = async () => {
       const prompt = await getCustomPrompt();
       setCustomPrompt(prompt);
@@ -40,14 +42,16 @@ export default function Index() {
     fetchPrompt();
   }, []);
 
-  const handleAddField = (field: ExtractField) => {
-    addExtractField(field);
-    setExtractFields(getExtractFields());
+  const handleAddField = async (field: ExtractField) => {
+    await addExtractField(field);
+    const updatedFields = await getExtractFields();
+    setExtractFields(updatedFields);
   };
 
-  const handleRemoveField = (id: string) => {
-    removeExtractField(id);
-    setExtractFields(getExtractFields());
+  const handleRemoveField = async (id: string) => {
+    await removeExtractField(id);
+    const updatedFields = await getExtractFields();
+    setExtractFields(updatedFields);
   };
 
   const handleWebsiteSubmit = async (website: string) => {
@@ -79,7 +83,6 @@ export default function Index() {
   };
 
   const handleModelChange = (model: OpenAIModel) => {
-    // When model changes, we can clear previous data to avoid confusion
     setCompanyData(null);
     setApiError(null);
   };
@@ -154,4 +157,3 @@ export default function Index() {
     </div>
   );
 }
-

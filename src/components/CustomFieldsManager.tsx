@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -28,7 +27,7 @@ export default function CustomFieldsManager({
     field => !defaultFields.some(df => df.id === field.id)
   );
 
-  const handleAddField = () => {
+  const handleAddField = async () => {
     if (!newFieldName.trim()) {
       toast.error("Please enter a field name");
       return;
@@ -37,7 +36,7 @@ export default function CustomFieldsManager({
     // Create a simple ID from the name
     const fieldId = `custom_${newFieldName.toLowerCase().replace(/\s+/g, '_')}_${Date.now()}`;
     
-    onAddField({
+    await onAddField({
       id: fieldId,
       name: newFieldName.trim()
     });
