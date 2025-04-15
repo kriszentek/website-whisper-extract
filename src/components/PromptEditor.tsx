@@ -12,11 +12,13 @@ export default function PromptEditor({ onPromptChange, defaultPrompt, website, f
   const [isEditing, setIsEditing] = useState(false);
   const [promptText, setPromptText] = useState("");
   const [savedPrompt, setSavedPrompt] = useState<string | null>(null);
+  const [prevWebsite, setPrevWebsite] = useState(website);
+  const [prevFields, setPrevFields] = useState<ExtractField[]>([]);
   
   // Generate the default prompt based on website and fields
-  const generateDefaultPrompt = () => {
-    const fieldsText = fields.map(field => field.name).join(", ");
-    return `Extract the following information about the company at ${website}:
+  const generateDefaultPrompt = (targetWebsite: string, targetFields: ExtractField[]) => {
+    const fieldsText = targetFields.map(field => field.name).join(", ");
+    return `Extract the following information about the company at ${targetWebsite}:
 ${fieldsText}
 
 Format your response as a JSON object with the following structure:
@@ -37,13 +39,30 @@ Format your response as a JSON object with the following structure:
         setPromptText(customPrompt);
         setSavedPrompt(customPrompt);
       } else {
-        const newDefaultPrompt = generateDefaultPrompt();
+        const newDefaultPrompt = generateDefaultPrompt(website, fields);
         setPromptText(newDefaultPrompt);
       }
     };
     
     fetchPrompt();
-  }, [website, fields]);
+    setPrevFields(fields);
+  }, []);
+
+  // When fields change, update the prompt if using default, or if website changes
+  useEffect(() => {
+    // Only regenerate if using default prompt (no saved prompt) or if website changed
+    const fieldsChanged = JSON.stringify(fields) !== JSON.stringify(prevFields);
+    const websiteChanged = website !== prevWebsite;
+    
+    if ((fieldsChanged || websiteChanged) && !savedPrompt) {
+      const newDefaultPrompt = generateDefaultPrompt(website, fields);
+      setPromptText(newDefaultPrompt);
+      onPromptChange(newDefaultPrompt);
+    }
+    
+    setPrevWebsite(website);
+    setPrevFields(fields);
+  }, [website, fields, savedPrompt]);
 
   const handleSavePrompt = async () => {
     if (promptText.trim() === "") {
@@ -59,11 +78,11 @@ Format your response as a JSON object with the following structure:
   };
 
   const handleResetPrompt = async () => {
-    const defaultPromptText = generateDefaultPrompt();
+    const defaultPromptText = generateDefaultPrompt(website, fields);
     setPromptText(defaultPromptText);
     await saveCustomPrompt(null);
     setSavedPrompt(null);
-    onPromptChange(null);
+    onPromptChange(defaultPromptText);
     setIsEditing(false);
     toast.info("Prompt reset to default");
   };
@@ -92,7 +111,7 @@ Format your response as a JSON object with the following structure:
         ) : (
           <div className="bg-muted p-4 rounded-md overflow-auto max-h-[200px]">
             <pre className="whitespace-pre-wrap text-sm">
-              {savedPrompt || generateDefaultPrompt()}
+              {savedPrompt || generateDefaultPrompt(website, fields)}
             </pre>
           </div>
         )}

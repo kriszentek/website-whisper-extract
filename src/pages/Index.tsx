@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import WebsiteForm from "@/components/WebsiteForm";
 import ResultsCard from "@/components/ResultsCard";
@@ -25,15 +26,21 @@ export default function Index() {
   const [customPrompt, setCustomPrompt] = useState<string | null>(null);
   const [showPromptEditor, setShowPromptEditor] = useState(false);
   const [apiError, setApiError] = useState<string | null>(null);
+  const [fieldsLoaded, setFieldsLoaded] = useState(false);
 
+  // Load fields only once when component mounts
   useEffect(() => {
     const loadFields = async () => {
       const fields = await getExtractFields();
       setExtractFields(fields);
+      setFieldsLoaded(true);
     };
     
     loadFields();
-    
+  }, []);
+
+  // Load custom prompt separately
+  useEffect(() => {
     const fetchPrompt = async () => {
       const prompt = await getCustomPrompt();
       setCustomPrompt(prompt);
@@ -41,6 +48,13 @@ export default function Index() {
     
     fetchPrompt();
   }, []);
+
+  // When fields change and we've loaded already, regenerate the prompt
+  useEffect(() => {
+    if (fieldsLoaded && website) {
+      setShowPromptEditor(true);
+    }
+  }, [extractFields, fieldsLoaded]);
 
   const handleAddField = async (field: ExtractField) => {
     await addExtractField(field);
