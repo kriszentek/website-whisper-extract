@@ -13,7 +13,11 @@ export async function fetchExtractFields(): Promise<ExtractField[]> {
       return [];
     }
     
-    return data || [];
+    // Map database fields to ExtractField type
+    return data ? data.map(item => ({
+      id: item.field_id,
+      name: item.name
+    })) : [];
   } catch (error) {
     console.error('Unexpected error fetching extract fields:', error);
     return [];

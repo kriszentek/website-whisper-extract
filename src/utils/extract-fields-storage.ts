@@ -12,8 +12,8 @@ export const getExtractFields = async (): Promise<ExtractField[]> => {
     const combinedFields = [
       ...DEFAULT_EXTRACT_FIELDS, 
       ...customFields.filter(cf => 
-        !DEFAULT_EXTRACT_FIELDS.some(df => df.id === cf.field_id)
-      ).map(cf => ({ id: cf.field_id, name: cf.name }))
+        !DEFAULT_EXTRACT_FIELDS.some(df => df.id === cf.id)
+      )
     ];
     
     return combinedFields;
