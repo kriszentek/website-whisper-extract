@@ -1,24 +1,21 @@
 
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Globe, Search } from "lucide-react";
 import { toast } from "sonner";
 
 interface WebsiteFormProps {
-  onSubmit: (website: string) => void;
+  onSubmit: (websites: string[]) => void;
   isLoading: boolean;
-  showPrompt: () => void;
 }
 
-export default function WebsiteForm({ onSubmit, isLoading, showPrompt }: WebsiteFormProps) {
-  const [website, setWebsite] = useState("");
+export default function WebsiteForm({ onSubmit, isLoading }: WebsiteFormProps) {
+  const [websites, setWebsites] = useState("");
 
   const validateUrl = (url: string): boolean => {
-    // Simple URL validation
     try {
-      // Add protocol if missing
       const urlWithProtocol = url.startsWith('http') ? url : `https://${url}`;
       new URL(urlWithProtocol);
       return true;
@@ -30,24 +27,28 @@ export default function WebsiteForm({ onSubmit, isLoading, showPrompt }: Website
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
-    const trimmedWebsite = website.trim();
-    if (!trimmedWebsite) {
-      toast.error("Please enter a website");
+    const websiteList = websites
+      .split('\n')
+      .map(site => site.trim())
+      .filter(site => site.length > 0);
+
+    if (websiteList.length === 0) {
+      toast.error("Please enter at least one website");
       return;
     }
 
-    if (!validateUrl(trimmedWebsite)) {
-      toast.error("Please enter a valid website URL");
+    const invalidUrls = websiteList.filter(site => !validateUrl(site));
+    if (invalidUrls.length > 0) {
+      toast.error(`Invalid URLs detected: ${invalidUrls.join(', ')}`);
       return;
     }
 
-    // Normalize URL (add https:// if needed)
-    const normalizedUrl = trimmedWebsite.startsWith('http') 
-      ? trimmedWebsite 
-      : `https://${trimmedWebsite}`;
+    // Normalize URLs (add https:// if needed)
+    const normalizedUrls = websiteList.map(site => 
+      site.startsWith('http') ? site : `https://${site}`
+    );
 
-    onSubmit(normalizedUrl);
-    showPrompt(); // Show the prompt editor after submitting
+    onSubmit(normalizedUrls);
   };
 
   return (
@@ -55,22 +56,20 @@ export default function WebsiteForm({ onSubmit, isLoading, showPrompt }: Website
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <Globe className="h-5 w-5" />
-          Website Analysis
+          Bulk Website Analysis
         </CardTitle>
         <CardDescription>
-          Enter a company website to extract information using OpenAI
+          Enter company websites (one per line) to extract information using OpenAI
         </CardDescription>
       </CardHeader>
       <form onSubmit={handleSubmit}>
         <CardContent>
-          <div className="flex flex-col sm:flex-row gap-2">
-            <Input
-              placeholder="Enter company website (e.g., example.com)"
-              value={website}
-              onChange={(e) => setWebsite(e.target.value)}
-              className="flex-1"
-            />
-          </div>
+          <Textarea
+            placeholder="Enter company websites (e.g., example.com)"
+            value={websites}
+            onChange={(e) => setWebsites(e.target.value)}
+            className="min-h-[120px]"
+          />
         </CardContent>
         <CardFooter className="flex justify-end">
           <Button 

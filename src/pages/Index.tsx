@@ -17,7 +17,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 
 export default function Index() {
-  const [companyData, setCompanyData] = useState<CompanyData | null>(null);
+  const [companiesData, setCompaniesData] = useState<CompanyData[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [activeTab, setActiveTab] = useState("analyze");
   const [extractFields, setExtractFields] = useState<ExtractField[]>(DEFAULT_EXTRACT_FIELDS);
@@ -27,7 +27,6 @@ export default function Index() {
   const [apiError, setApiError] = useState<string | null>(null);
   const [fieldsLoaded, setFieldsLoaded] = useState(false);
 
-  // Function to load fields
   const loadFields = async () => {
     try {
       const fields = await getExtractFields();
@@ -37,13 +36,11 @@ export default function Index() {
     } catch (error) {
       console.error('Error loading fields:', error);
       toast.error("Failed to load extraction fields");
-      // Fallback to default fields
       setExtractFields(DEFAULT_EXTRACT_FIELDS);
       setFieldsLoaded(true);
     }
   };
 
-  // Load fields and prompt when component mounts
   useEffect(() => {
     loadFields();
     
@@ -55,7 +52,6 @@ export default function Index() {
     fetchPrompt();
   }, []);
 
-  // When fields change and we've loaded already, update the prompt editor
   useEffect(() => {
     if (fieldsLoaded && website) {
       setShowPromptEditor(true);
@@ -66,7 +62,6 @@ export default function Index() {
     try {
       await addExtractField(field);
       toast.success(`Added field: ${field.name}`);
-      // Reload fields to include the new one
       await loadFields();
     } catch (error) {
       console.error('Error adding field:', error);
@@ -78,7 +73,6 @@ export default function Index() {
     try {
       await removeExtractField(id);
       toast.success("Field removed successfully");
-      // Reload fields after removal
       await loadFields();
     } catch (error) {
       console.error('Error removing field:', error);
@@ -86,20 +80,34 @@ export default function Index() {
     }
   };
 
-  const handleWebsiteSubmit = async (website: string) => {
+  const handleWebsitesSubmit = async (websites: string[]) => {
     setIsLoading(true);
-    setWebsite(website);
+    setWebsite(websites[0]);
     setApiError(null);
     
     try {
-      const response = await extractCompanyInfo(website, extractFields, customPrompt);
+      const results = await Promise.all(
+        websites.map(website => 
+          extractCompanyInfo(website, extractFields, customPrompt)
+        )
+      );
       
-      if (response.success) {
-        setCompanyData(response.data);
-        setShowPromptEditor(true); // Always show prompt editor after successful analysis
-      } else {
-        setApiError(response.error || "Failed to extract information");
-        toast.error(response.error || "Failed to extract information");
+      const successfulResults = results
+        .filter(response => response.success)
+        .map(response => response.data);
+      
+      const errors = results
+        .filter(response => !response.success)
+        .map(response => response.error);
+      
+      if (errors.length > 0) {
+        const errorMessage = `Some analyses failed: ${errors.join('; ')}`;
+        setApiError(errorMessage);
+        toast.error(errorMessage);
+      }
+
+      if (successfulResults.length > 0) {
+        setCompaniesData(successfulResults);
       }
     } catch (error) {
       console.error("Error extracting company info:", error);
@@ -116,7 +124,7 @@ export default function Index() {
   };
 
   const handleModelChange = (model: OpenAIModel) => {
-    setCompanyData(null);
+    setCompaniesData([]);
     setApiError(null);
   };
 
@@ -124,7 +132,6 @@ export default function Index() {
     setShowPromptEditor(!showPromptEditor);
   };
 
-  // When tab changes to customize, ensure fields are loaded
   const handleTabChange = (value: string) => {
     setActiveTab(value);
     if (value === "customize") {
@@ -158,19 +165,9 @@ export default function Index() {
 
         <TabsContent value="analyze" className="space-y-6 mt-6">
           <WebsiteForm 
-            onSubmit={handleWebsiteSubmit} 
+            onSubmit={handleWebsitesSubmit} 
             isLoading={isLoading}
-            showPrompt={() => setShowPromptEditor(true)}
           />
-          
-          {(showPromptEditor || !!customPrompt) && (
-            <PromptEditor
-              onPromptChange={handlePromptChange}
-              defaultPrompt=""
-              website={website}
-              fields={extractFields}
-            />
-          )}
           
           {apiError && (
             <Alert variant="destructive" className="bg-destructive/10">
@@ -182,11 +179,17 @@ export default function Index() {
           )}
           
           <div className="pt-2">
-            <ResultsCard data={companyData} isLoading={isLoading} />
+            <ResultsCard data={companiesData} isLoading={isLoading} />
           </div>
         </TabsContent>
 
-        <TabsContent value="customize" className="mt-6">
+        <TabsContent value="customize" className="mt-6 space-y-6">
+          <PromptEditor
+            onPromptChange={handlePromptChange}
+            defaultPrompt=""
+            website={website}
+            fields={extractFields}
+          />
           <CustomFieldsManager 
             fields={extractFields} 
             defaultFields={DEFAULT_EXTRACT_FIELDS}

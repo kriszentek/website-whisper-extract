@@ -3,9 +3,10 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { CompanyData, ExtractedInfo } from "@/types";
 import { Info, ExternalLink } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 
 interface ResultsCardProps {
-  data: CompanyData | null;
+  data: CompanyData[] | null;
   isLoading: boolean;
 }
 
@@ -16,22 +17,16 @@ export default function ResultsCard({ data, isLoading }: ResultsCardProps) {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Info className="h-5 w-5" />
-            Company Information
+            Results
           </CardTitle>
           <CardDescription>
-            <div className="w-40">
-              {/* Fix DOM nesting warning by not nesting div inside p */}
-              <Skeleton className="h-4 w-full" />
-            </div>
+            <Skeleton className="h-4 w-40" />
           </CardDescription>
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
-            {[1, 2, 3, 4].map((i) => (
-              <div key={i} className="space-y-2">
-                <Skeleton className="h-4 w-32" />
-                <Skeleton className="h-6 w-full" />
-              </div>
+            {[1, 2, 3].map((i) => (
+              <Skeleton key={i} className="h-12 w-full" />
             ))}
           </div>
         </CardContent>
@@ -39,16 +34,16 @@ export default function ResultsCard({ data, isLoading }: ResultsCardProps) {
     );
   }
 
-  if (!data) {
+  if (!data || data.length === 0) {
     return (
       <Card className="w-full">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Info className="h-5 w-5" />
-            Company Information
+            Results
           </CardTitle>
           <CardDescription>
-            Enter a website above to analyze company information
+            Enter websites above to analyze company information
           </CardDescription>
         </CardHeader>
         <CardContent className="text-center py-8 text-muted-foreground">
@@ -58,43 +53,52 @@ export default function ResultsCard({ data, isLoading }: ResultsCardProps) {
     );
   }
 
-  const formatDate = (timestamp: number): string => {
-    return new Date(timestamp).toLocaleString();
-  };
+  // Get field names from the first result
+  const fieldNames = data[0].info.map(item => item.name);
 
   return (
     <Card className="w-full">
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <Info className="h-5 w-5" />
-          Company Information
+          Analysis Results
         </CardTitle>
-        <CardDescription className="flex items-center justify-between">
-          <span>Based on analysis of {data.website}</span>
-          <a 
-            href={data.website} 
-            target="_blank" 
-            rel="noopener noreferrer" 
-            className="inline-flex items-center text-xs text-primary hover:underline gap-1"
-          >
-            Visit website
-            <ExternalLink className="h-3 w-3" />
-          </a>
+        <CardDescription>
+          Analysis results for {data.length} website{data.length > 1 ? 's' : ''}
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <div className="space-y-4">
-          {data.info.map((item: ExtractedInfo, index: number) => (
-            <div key={index} className="space-y-1">
-              <h3 className="text-sm font-medium text-muted-foreground">{item.name}</h3>
-              <p className="text-lg">{item.value || "Unknown"}</p>
-            </div>
-          ))}
-          <div className="pt-4 border-t border-border">
-            <div className="text-xs text-muted-foreground">
-              Results generated on {formatDate(data.timestamp)}
-            </div>
-          </div>
+        <div className="overflow-x-auto">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Website</TableHead>
+                {fieldNames.map((name) => (
+                  <TableHead key={name}>{name}</TableHead>
+                ))}
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {data.map((company, index) => (
+                <TableRow key={index}>
+                  <TableCell>
+                    <a 
+                      href={company.website} 
+                      target="_blank" 
+                      rel="noopener noreferrer" 
+                      className="inline-flex items-center hover:underline gap-1"
+                    >
+                      {new URL(company.website).hostname}
+                      <ExternalLink className="h-3 w-3" />
+                    </a>
+                  </TableCell>
+                  {company.info.map((item, i) => (
+                    <TableCell key={i}>{item.value || "Unknown"}</TableCell>
+                  ))}
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
         </div>
       </CardContent>
     </Card>
