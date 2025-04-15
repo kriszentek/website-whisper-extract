@@ -1,12 +1,16 @@
 
 import { ExtractField } from "@/types";
 import { DEFAULT_EXTRACT_FIELDS } from "./constants";
-import { fetchExtractFields, addExtractField as addField, removeExtractField as removeField } from "@/services/extract-fields-service";
+
+const STORAGE_KEY = 'website-whisper-extract-fields';
 
 export const getExtractFields = async (): Promise<ExtractField[]> => {
   try {
-    const customFields = await fetchExtractFields();
-    console.log('Retrieved fields from Supabase:', customFields);
+    console.log('Getting extract fields from localStorage');
+    
+    // Get custom fields from local storage
+    const storedFields = localStorage.getItem(STORAGE_KEY);
+    let customFields: ExtractField[] = storedFields ? JSON.parse(storedFields) : [];
     
     // Combine default fields with custom fields, preventing duplicates
     const combinedFields = [
@@ -16,6 +20,7 @@ export const getExtractFields = async (): Promise<ExtractField[]> => {
       )
     ];
     
+    console.log('Combined fields:', combinedFields);
     return combinedFields;
   } catch (error) {
     console.error('Error fetching extract fields:', error);
@@ -25,14 +30,19 @@ export const getExtractFields = async (): Promise<ExtractField[]> => {
 
 export const addExtractField = async (field: ExtractField): Promise<void> => {
   try {
-    console.log('Adding extract field:', field);
-    const success = await addField(field);
+    console.log('Adding extract field to localStorage:', field);
     
-    if (success) {
-      console.log('Field added successfully:', field);
-    } else {
-      console.error('Failed to add field');
-    }
+    // Get existing fields
+    const storedFields = localStorage.getItem(STORAGE_KEY);
+    let fields: ExtractField[] = storedFields ? JSON.parse(storedFields) : [];
+    
+    // Add new field
+    fields.push(field);
+    
+    // Save back to localStorage
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(fields));
+    
+    console.log('Field added successfully:', field);
   } catch (error) {
     console.error('Failed to add field:', error);
   }
@@ -40,14 +50,19 @@ export const addExtractField = async (field: ExtractField): Promise<void> => {
 
 export const removeExtractField = async (fieldId: string): Promise<void> => {
   try {
-    console.log('Removing extract field, id:', fieldId);
-    const success = await removeField(fieldId);
+    console.log('Removing extract field from localStorage, id:', fieldId);
     
-    if (success) {
-      console.log('Field removed successfully:', fieldId);
-    } else {
-      console.error('Failed to remove field');
-    }
+    // Get existing fields
+    const storedFields = localStorage.getItem(STORAGE_KEY);
+    let fields: ExtractField[] = storedFields ? JSON.parse(storedFields) : [];
+    
+    // Filter out the field to remove
+    fields = fields.filter(field => field.id !== fieldId);
+    
+    // Save back to localStorage
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(fields));
+    
+    console.log('Field removed successfully:', fieldId);
   } catch (error) {
     console.error('Failed to remove field:', error);
   }

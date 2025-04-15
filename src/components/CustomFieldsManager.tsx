@@ -61,6 +61,8 @@ export default function CustomFieldsManager({
     
     // Immediately remove from local state for instant UI feedback
     setCustomFields(prev => prev.filter(field => field.id !== id));
+    
+    toast.success("Field removed successfully");
   };
 
   return (
