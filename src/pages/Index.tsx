@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import WebsiteForm from "@/components/WebsiteForm";
 import ResultsCard from "@/components/ResultsCard";
@@ -30,9 +29,18 @@ export default function Index() {
 
   // Function to load fields
   const loadFields = async () => {
-    const fields = await getExtractFields();
-    setExtractFields(fields);
-    setFieldsLoaded(true);
+    try {
+      const fields = await getExtractFields();
+      console.log('Loaded fields:', fields);
+      setExtractFields(fields);
+      setFieldsLoaded(true);
+    } catch (error) {
+      console.error('Error loading fields:', error);
+      toast.error("Failed to load extraction fields");
+      // Fallback to default fields
+      setExtractFields(DEFAULT_EXTRACT_FIELDS);
+      setFieldsLoaded(true);
+    }
   };
 
   // Load fields and prompt when component mounts
@@ -52,18 +60,30 @@ export default function Index() {
     if (fieldsLoaded && website) {
       setShowPromptEditor(true);
     }
-  }, [extractFields, fieldsLoaded]);
+  }, [fieldsLoaded, website]);
 
   const handleAddField = async (field: ExtractField) => {
-    await addExtractField(field);
-    // Reload fields to include the new one
-    await loadFields();
+    try {
+      await addExtractField(field);
+      toast.success(`Added field: ${field.name}`);
+      // Reload fields to include the new one
+      await loadFields();
+    } catch (error) {
+      console.error('Error adding field:', error);
+      toast.error(`Failed to add field: ${field.name}`);
+    }
   };
 
   const handleRemoveField = async (id: string) => {
-    await removeExtractField(id);
-    // Reload fields after removal
-    await loadFields();
+    try {
+      await removeExtractField(id);
+      toast.success("Field removed successfully");
+      // Reload fields after removal
+      await loadFields();
+    } catch (error) {
+      console.error('Error removing field:', error);
+      toast.error("Failed to remove field");
+    }
   };
 
   const handleWebsiteSubmit = async (website: string) => {

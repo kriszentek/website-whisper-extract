@@ -28,7 +28,9 @@ export default function CustomFieldsManager({
     field => !defaultFields.some(df => df.id === field.id)
   );
 
-  const handleAddField = async () => {
+  console.log('Custom fields in manager:', customFields);
+
+  const handleAddField = () => {
     if (!newFieldName.trim()) {
       toast.error("Please enter a field name");
       return;
@@ -42,9 +44,8 @@ export default function CustomFieldsManager({
       name: newFieldName.trim()
     };
     
-    await onAddField(newField);
+    onAddField(newField);
     setNewFieldName("");
-    toast.success(`Added new field: ${newFieldName}`);
   };
 
   return (
@@ -62,7 +63,7 @@ export default function CustomFieldsManager({
             <div className="flex space-x-2">
               <Input
                 id="newField"
-                placeholder="e.g., CEO name, founding year, etc."
+                placeholder="e.g., Sub-industry, CEO name, founding year, etc."
                 value={newFieldName}
                 onChange={(e) => setNewFieldName(e.target.value)}
                 className="flex-1"
@@ -89,10 +90,7 @@ export default function CustomFieldsManager({
                     <Button 
                       variant="ghost" 
                       size="sm" 
-                      onClick={() => {
-                        onRemoveField(field.id);
-                        toast.info(`Removed field: ${field.name}`);
-                      }}
+                      onClick={() => onRemoveField(field.id)}
                       className="h-8 w-8 p-0"
                     >
                       <Trash2 className="h-4 w-4 text-destructive" />
